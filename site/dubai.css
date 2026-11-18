@@ -137,3 +137,22 @@ details.art[open] > summary::before { content: '−'; }
 details.art, .qa, details.law { scroll-margin-top: 84px; }
 table.data.rc-bands td, table.data.rc-bands th { white-space: normal; height: auto; }
 @media (max-width: 600px) { table.data.rc-bands td.num { font-family: inherit; } table.data.rc-bands th:last-child, table.data.rc-bands td.num { width: 38%; } }
+
+/* ---------------------------------------------------------------- ask AI */
+.ask-ai { border-color: var(--gold); }
+.ask-ai .ic { color: var(--gold); }
+.ask-back { position: fixed; inset: 0; background: rgba(2, 6, 23, .45); z-index: 3999; }
+.drawer.ask { width: min(520px, 100vw); gap: 14px; z-index: 4000; }
+.drawer.ask textarea { padding: 10px 11px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); font-size: 15px; resize: vertical; width: 100%; }
+.drawer.ask textarea:focus { outline: 2px solid var(--ring); border-color: var(--accent); }
+.ask-sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.ask-sugg .chip { text-align: left; line-height: 1.35; height: auto; }
+.ask-go { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ask-go .btn { justify-content: center; min-height: 42px; }
+.ask-go .btn[data-ai="copy"] { grid-column: 1 / 3; }
+.ask-see summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+.ask-see pre { white-space: pre-wrap; font-size: 11.5px; line-height: 1.5; max-height: 260px; overflow: auto; background: var(--muted); padding: 10px; border-radius: var(--r-sm); margin: 8px 0 0; }
+.drawer-note a { color: var(--accent); display: inline-flex; gap: 4px; align-items: center; }
+.drawer-note .ic { width: 14px; height: 14px; }
+.qa-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.qa-ask .ic { color: var(--gold); }

@@ -198,6 +198,8 @@ def main():
         print('official.json', len(o.get('figures', [])), 'figures')
     import lawlib
     lawlib.main()
+    import aiexport
+    aiexport.main()
 
 
 if __name__ == '__main__':

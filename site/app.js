@@ -115,6 +115,7 @@ function route() {
   $$('.tab[data-view]').forEach(t => { const on = t.dataset.view === view; t.classList.toggle('is-on', on); on ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current'); });
   $$('.nav-g').forEach(g => g.classList.toggle('has-on', !!g.querySelector('.tab.is-on')));
   closeGroups();
+  if (typeof closeAsk === 'function') closeAsk();
   $('.side').classList.remove('open');
   $('#scope-sel').value = view === 'areas' && currentArea ? currentArea : '';
   render(view);
@@ -128,7 +129,12 @@ function render(view, redraw) {
   const f = VIEWS[view];
   if (f) f();
 }
-function head(view, title, sub) { $(`#${view}-title`).textContent = title; $(`#${view}-sub`).innerHTML = sub || ''; }
+function head(view, title, sub) {
+  $(`#${view}-title`).textContent = title; $(`#${view}-sub`).innerHTML = sub || '';
+  const act = $(`#${view}-actions`);
+  if (act && !act.querySelector('.ask-ai')) act.innerHTML = `<button type="button" class="btn ask-ai" title="Ask Claude, ChatGPT or any AI about this page, with its figures attached">${icon('genie')}<span>Ask AI</span></button>`;
+  if (act) act.querySelector('.ask-ai').onclick = () => openAsk();
+}
 function body(view, html) { $(`#${view}-body`).innerHTML = html; }
 
 /* --------------------------------------------------------------- pieces */
@@ -661,7 +667,7 @@ function qaCard(q, toks) {
     <h2>${hl(q.q, toks)}</h2>
     ${q.a.map(p => `<p>${hl(p, toks)}</p>`).join('')}
     ${q.review ? `<p class="rc-warn">${icon('alert')}<span>The official wording of an article this answer relies on changed after the answer was last checked. Read the article itself until it is reviewed.</span></p>` : ''}
-    ${q.tool === 'rentcheck' ? `<p><a class="btn" href="#rentcheck">${icon('coins')}<span>Check your own numbers</span></a></p>` : ''}
+    <p class="qa-acts">${q.tool === 'rentcheck' ? `<a class="btn" href="#rentcheck">${icon('coins')}<span>Check your own numbers</span></a>` : ''}<button type="button" class="btn qa-ask" data-q="${q.id}">${icon('genie')}<span>Ask AI about this</span></button></p>
     <div class="qa-foot"><span class="qa-based">Based on</span>${cites}<a class="qa-off" href="${esc(q.cite[0].url)}" target="_blank" rel="noopener">Official text ${icon('open')}</a></div>
   </article>`;
 }
@@ -731,7 +737,135 @@ function lawResults() {
       ${!qs.length && !arts.length ? '<p class="empty-note">Nothing matches. Try fewer or different words.</p>' : ''}`;
   }
   el.innerHTML = html;
+  $$('.qa-ask', el).forEach(b => b.addEventListener('click', () => openAsk(LAWS.answers.find(q => q.id === b.dataset.q))));
 }
+
+/* --------------------------------------------------------------- ASK AI
+   Sends the visitor's question, with the figures on the current page, to the AI they choose. Nothing goes through
+   Dubai Insight: the browser opens Claude or ChatGPT with the prompt filled in, or copies it for any other AI. */
+const AI_MAX = 7000;   // characters of prompt; both services accept more, but long links break on some phones
+const PUBLIC_SITE = () => /^https:/.test(location.protocol) && !/claude|localhost|127\.0\.0\.1|usercontent/.test(location.host) ? location.origin + location.pathname.replace(/[^/]*$/, '') : '';
+function rowsTable(head, rows) { return [head.join(' | '), ...rows.map(r => r.join(' | '))].join('\n'); }
+function aiContext() {
+  const v = current, t = $(`#${v}-title`) ? $(`#${v}-title`).textContent : 'Dubai Insight';
+  const c = { title: t, text: '', ask: [] };
+  const L = RE && RE.last12, R = RE && RE.rent;
+  const cityLines = () => L ? `Dubai property sales ${ml(L.from)} to ${ml(L.to)}: ${fmt(L.sales)} sales worth ${aed(L.value)}; typical price per m²: flats AED ${fmt(L.ppsqm_flat)}, villas AED ${fmt(L.ppsqm_villa)}; ${fmt(L.offplan_share, 1)}% sold off-plan.` + (RE.prev12 ? ` The 12 months before: ${fmt(RE.prev12.sales)} sales, flats AED ${fmt(RE.prev12.ppsqm_flat)}/m², ${fmt(RE.prev12.offplan_share, 1)}% off-plan.` : '') : '';
+  const rentLines = () => R && R.last12 && R.last12.contracts ? `Rental contracts registered in Ejari ${ml(R.last12.from)} to ${ml(R.last12.to)}: ${fmt(R.last12.contracts)} (${fmt(R.last12.new)} new); typical yearly rent: flats AED ${fmt(R.last12.flat)}, villas AED ${fmt(R.last12.villa)}. These are medians of all contracts, every size, not the official rental index.` : '';
+  const months = n => rowsTable(['Month', 'Sales', 'Value AED m', 'Off-plan %', 'Flats AED/m²', 'Villas AED/m²'],
+    RE.monthly.slice(-n).map(r => [ml(r.m) + (r.partial ? ' (still being registered)' : ''), fmt(r.sales), fmt(r.value / 1e6), r.sales ? fmt(r.offplan / r.sales * 100, 1) : '–', fmt(r.ppsqm_flat), fmt(r.ppsqm_villa)]));
+  const areaTable = n => rowsTable(['Area', 'Sales', 'Off-plan %', 'Flats AED/m²', 'Villas AED/m²', 'Typical flat rent AED/yr'],
+    RE.areas.slice(0, n).map(a => { const r = rentRow(a.name); return [a.name, fmt(a.sales), fmt(a.offplan_share, 0), a.n_flat >= 10 ? fmt(a.ppsqm_flat) : '–', a.n_villa >= 10 ? fmt(a.ppsqm_villa) : '–', r && r.n_flat >= 20 ? fmt(r.flat) : '–']; }));
+  const offLines = sec => OFF ? OFF.figures.filter(f => !sec || sec.includes(f.section)).map(f => `- ${f.label} (${f.period}): ${f.table ? f.table.map(([k, x]) => `${k} ${fmt(x)}`).join(', ') : figValue(f).replace(/<[^>]+>/g, '')}${f.detail ? '. ' + f.detail : ''}. Source: ${f.by}, ${f.source}`).join('\n') : '';
+  if (v === 'dashboard') {
+    c.text = [cityLines(), rentLines(), RE ? `Busiest areas, ${AS()}:\n` + areaTable(15) : '', offLines(['population', 'tourism', 'business', 'transport'])].filter(Boolean).join('\n\n');
+    c.ask = ['Summarise what is happening in Dubai property right now', 'Which areas are growing fastest, and what might explain it?', 'Is the off-plan share of sales high by past standards?'];
+  } else if (v === 'sales' && RE) {
+    c.text = cityLines() + '\n\nLast 25 months:\n' + months(25) + '\n\nBy property type, last 12 months:\n' + RE.by_type.slice(0, 8).map(x => `${x.type}: ${fmt(x.count)} sales, ${aed(x.value)}`).join('; ');
+    c.ask = ['How have prices per square metre changed over two years?', 'Why might sales be lower this year than last?', 'Explain off-plan versus ready sales in simple terms'];
+  } else if (v === 'rents' && RE) {
+    c.text = rentLines() + '\n\nAreas by number of contracts:\n' + rowsTable(['Area', 'Contracts', 'New', 'Typical flat rent AED/yr', 'Typical villa rent AED/yr'],
+      [...(R.areas || [])].sort((a, b) => b.contracts - a.contracts).slice(0, 40).map(a => [a.name, fmt(a.contracts), fmt(a.new), a.n_flat >= 20 ? fmt(a.flat) : '–', a.n_villa >= 20 ? fmt(a.villa) : '–']));
+    c.ask = ['Which areas have the cheapest typical flat rents?', 'What share of contracts are renewals, and what does that suggest?', 'Compare rents in Business Bay and Dubai Marina'];
+  } else if (v === 'areas' && RE) {
+    if (currentArea) {
+      const A = areaRow(currentArea), Rr = rentRow(currentArea);
+      c.title = currentArea + ' (area profile)';
+      c.text = [A ? `${currentArea}, ${AS()}: ${fmt(A.sales)} sales worth ${aed(A.value)}, ${fmt(A.offplan_share, 0)}% off-plan, ${fmt(A.mortgages)} mortgages; flats AED ${A.n_flat >= 10 ? fmt(A.ppsqm_flat) : '–'}/m², villas AED ${A.n_villa >= 10 ? fmt(A.ppsqm_villa) : '–'}/m². For comparison, ${cityLines()}` : '',
+        A && A.series ? 'Month by month (month, sales, flats AED/m², villas AED/m²):\n' + A.series.map(r => `${ml(r[0])}${RE.monthly.some(m => m.m === r[0] && m.partial) ? ' (still being registered)' : ''}: ${fmt(r[1])}, ${fmt(r[2])}, ${fmt(r[3])}`).join('\n') : '',
+        Rr ? `Rental contracts ${span(R.last12.from, R.last12.to)}: ${fmt(Rr.contracts)} (${fmt(Rr.new)} new); typical yearly rent flats AED ${Rr.n_flat >= 20 ? fmt(Rr.flat) : '–'}, villas AED ${Rr.n_villa >= 20 ? fmt(Rr.villa) : '–'}.` : ''].filter(Boolean).join('\n\n');
+      c.ask = [`Is ${currentArea} getting more or less expensive?`, `How does ${currentArea} compare with the rest of Dubai?`, `What is the gross rental yield in ${currentArea}, roughly?`];
+    } else {
+      c.text = cityLines() + `\n\nAll areas, ${AS()}, by number of sales:\n` + areaTable(60);
+      c.ask = ['Which areas have the lowest price per square metre for flats?', 'Which areas are mostly off-plan?', 'Group these areas into budget, mid-range and premium'];
+    }
+  } else if (['population', 'transport', 'schools', 'business', 'tourism'].includes(v)) {
+    c.text = offLines([v]) || offLines();
+    c.ask = { population: ['How fast is Dubai\'s population growing?', 'What does the age mix say about Dubai?'], transport: ['How many new vehicles are registered each day?', 'How busy is the Metro?'], schools: ['How fast are private-school student numbers growing?'], business: ['How many new businesses start each month?'], tourism: ['How does tourism compare with population?'] }[v] || [];
+  } else if (v === 'rentcheck') {
+    const rent = num(RC.rent), avg = num(RC.avg);
+    const d = LAWS && lawById('decree43'), t14 = LAWS && lawById('tenancy');
+    c.text = (rent && avg ? (() => { const r = rcBand(rent, avg); return `My current yearly rent: AED ${fmt(rent)}. Average yearly rent for similar homes (Smart Rental Index): AED ${fmt(avg)}. Dubai Insight's result: my rent is ${fmt(r.gap, 1)}% below the average, so the most it can rise is ${r.band.inc}% (AED ${fmt(r.inc)}), to AED ${fmt(rent + r.inc)}.`; })() : 'I have not entered my numbers yet.')
+      + (RC.end ? ` My lease ends on ${RC.end}.` : '')
+      + (d ? `\n\nDecree 43 of 2013, Article 1 (official English text):\n${d.articles[0].text}\nArticle 3: ${d.articles[2].text}` : '')
+      + (t14 ? `\n\nTenancy law (Law 26 of 2007 as amended), Article 14: ${t14.articles.find(a => a.no === 14).text}` : '');
+    c.ask = ['My landlord wants more than this. What can I do?', 'Write a polite message to my landlord about the renewal', 'Explain how the rent increase rule works'];
+  } else if (v === 'laws' && LAWS) {
+    c.text = 'Questions answered on this page:\n' + LAWS.answers.map(q => '- ' + q.q).join('\n');
+    c.ask = ['My landlord wants me out to sell the flat. What are my rights?', 'Can my building\'s manager block my access card over unpaid service charges?', 'My off-plan project is delayed. Is my money protected?'];
+    c.laws = true;
+  } else {
+    c.text = cityLines() + '\n\n' + rentLines();
+  }
+  return c;
+}
+/* For law questions: pick the answers that best match the question and attach them with their article texts. */
+function lawPack(question, only) {
+  if (!LAWS) return '';
+  const toks = toksOf(question).filter(t => t.length > 3);
+  const scored = (only ? [only] : LAWS.answers.map(q => ({ q, s: toks.reduce((n, t) => n + (hay(q).includes(t) ? 1 : 0), 0) })).filter(x => x.s).sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.q));
+  if (!scored.length) return '';
+  const seen = new Set();
+  return '\n\nRelevant answers from Dubai Insight, each based on the official law text:\n' + scored.map(q => `Q: ${q.q}\nA: ${q.a.join(' ')}\nBased on: ${q.cite.map(citeText).join('; ')}`).join('\n\n')
+    + '\n\nThe articles (official English text from the Dubai Legal Portal; the Arabic text prevails):\n' + scored.flatMap(q => q.cite).filter(c => { const k = c.law + c.art; if (seen.has(k)) return false; seen.add(k); return true; })
+      .map(c => { const a = lawById(c.law).articles.find(x => x.no === c.art); return `${citeText(c)} (${a.url}):\n${a.text.length > 1800 ? a.text.slice(0, 1800) + ' [...]' : a.text}`; }).join('\n\n');
+}
+function buildPrompt(ctx, question, only) {
+  const site = PUBLIC_SITE();
+  let data = only ? lawPack(question, only).trim() : ctx.text + (ctx.laws ? lawPack(question) : '');
+  const headTxt = `I'm using Dubai Insight, a site that explains Dubai's official open data (Dubai Land Department, Dubai Legal Portal and other government sources). Below is what the page "${ctx.title}" shows. Answer my question from this data, say which figures you used, and say plainly if the data doesn't cover something. This is for information only: don't give legal, financial or investment advice; for legal questions cite the article numbers and remember the Arabic text prevails.`
+    + (site ? ` Everything on the site, in one file: ${site}ai/dubai-insight.md` : '');
+  const tail = `\n\nMy question: ${question || '(I have not typed one yet. Start by summarising the most useful points in this data for me.)'}`;
+  const room = AI_MAX - headTxt.length - tail.length - 40;
+  if (data.length > room) data = data.slice(0, room) + '\n[... trimmed to fit]';
+  return `${headTxt}\n\n--- DATA ---\n${data}\n--- END OF DATA ---${tail}`;
+}
+let ASK = null;
+function openAsk(only) {
+  closeAsk();
+  const ctx = aiContext();
+  const ask = only ? [`Explain this in simple terms with an example`, `How does this apply if I'm a ${only.topic === 'owning' ? 'flat owner' : only.topic === 'offplan' ? 'buyer' : 'tenant'}?`] : ctx.ask;
+  const d = document.createElement('div');
+  d.innerHTML = `<div class="ask-back"></div><aside class="drawer ask" role="dialog" aria-modal="true" aria-labelledby="ask-h">
+    <div class="drawer-head"><div><h2 id="ask-h">Ask your own AI</h2><p class="card-sub">${only ? 'About: ' + esc(only.q) : 'About: ' + esc(ctx.title)}. The page's figures${ctx.laws || only ? ' and the law text' : ''} go with your question.</p></div>
+      <button type="button" class="btn icon-only ask-x" aria-label="Close">${icon('x')}</button></div>
+    <label class="fld"><span>Your question</span><textarea id="ask-q" rows="3" placeholder="Type a question, or pick one below"></textarea></label>
+    <div class="ask-sugg">${ask.map(a => `<button type="button" class="chip">${esc(a)}</button>`).join('')}</div>
+    <div class="ask-go">
+      <button type="button" class="btn primary" data-ai="claude">${icon('send')}<span>Ask Claude</span></button>
+      <button type="button" class="btn primary" data-ai="chatgpt">${icon('send')}<span>Ask ChatGPT</span></button>
+      <button type="button" class="btn" data-ai="copy">${icon('file')}<span>Copy for any AI</span></button>
+    </div>
+    <p class="drawer-note" id="ask-msg" aria-live="polite"></p>
+    <details class="ask-see"><summary>See exactly what will be sent</summary><pre id="ask-pre"></pre></details>
+    <p class="drawer-note">Your question and this page's figures go straight from your browser to the AI you pick. Dubai Insight doesn't see or keep them. AI answers can be wrong: check them against the figures and the official sources.</p>
+    <p class="drawer-note"><a href="ai/dubai-insight.md" download="dubai-insight.md">${icon('download')} Download all of Dubai Insight's data as one file</a> to attach to any AI chat.</p>
+  </aside>`;
+  document.body.appendChild(d);
+  ASK = d;
+  const q = $('#ask-q', d), pre = $('#ask-pre', d);
+  const prompt = () => buildPrompt(ctx, q.value.trim(), only);
+  const refresh = () => { pre.textContent = prompt(); };
+  q.addEventListener('input', refresh);
+  $$('.ask-sugg .chip', d).forEach(b => b.addEventListener('click', () => { q.value = b.textContent; refresh(); q.focus(); }));
+  $$('[data-ai]', d).forEach(b => b.addEventListener('click', async () => {
+    const p = prompt(), msg = $('#ask-msg', d);
+    if (b.dataset.ai === 'copy') {
+      try { await navigator.clipboard.writeText(p); msg.textContent = 'Copied. Paste it into Gemini, Copilot or any other AI.'; }
+      catch (e) { pre.closest('details').open = true; msg.textContent = 'Copying is blocked here. Select the text below and copy it.'; }
+      return;
+    }
+    const url = b.dataset.ai === 'claude' ? 'https://claude.ai/new?q=' + encodeURIComponent(p) : 'https://chatgpt.com/?q=' + encodeURIComponent(p);
+    window.open(url, '_blank', 'noopener');
+    msg.textContent = `Opened ${b.dataset.ai === 'claude' ? 'Claude' : 'ChatGPT'} in a new tab with your question and the data filled in. If it opens empty, sign in, come back and press the button again, or use Copy.`;
+  }));
+  $('.ask-x', d).addEventListener('click', closeAsk);
+  $('.ask-back', d).addEventListener('click', closeAsk);
+  refresh();
+  setTimeout(() => q.focus(), 30);
+}
+function closeAsk() { if (ASK) { ASK.remove(); ASK = null; } }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAsk(); });
 
 function loadingNote(what) { return `<p class="empty-note">${what || 'Property figures'} are not available right now. Please try again later.</p>`; }
 

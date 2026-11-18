@@ -4,3 +4,5 @@ __pycache__/
 .cache/
 discovery.json
 site/data/
+site/ai/
+site/llms.txt
