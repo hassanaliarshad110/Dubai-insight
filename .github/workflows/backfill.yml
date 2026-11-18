@@ -1,0 +1,55 @@
+name: Backfill history
+
+# One-off: pulls past years in parallel, one job per year, so the history fills in hours rather than days.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - { kind: tx, from: '2026-01', to: '2026-04' }
+          - { kind: tx, from: '2025-01', to: '2025-12' }
+          - { kind: tx, from: '2024-01', to: '2024-12' }
+          - { kind: tx, from: '2023-01', to: '2023-12' }
+          - { kind: tx, from: '2022-01', to: '2022-12' }
+          - { kind: tx, from: '2021-01', to: '2021-12' }
+          - { kind: tx, from: '2020-01', to: '2020-12' }
+          - { kind: tx, from: '2019-01', to: '2019-12' }
+          - { kind: rent, from: '2026-01', to: '2026-10' }
+          - { kind: rent, from: '2025-07', to: '2025-12' }
+          - { kind: rent, from: '2025-01', to: '2025-06' }
+          - { kind: rent, from: '2024-07', to: '2024-12' }
+          - { kind: rent, from: '2024-01', to: '2024-06' }
+          - { kind: rent, from: '2023-07', to: '2023-12' }
+          - { kind: rent, from: '2023-01', to: '2023-06' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pull ${{ matrix.kind }} ${{ matrix.from }} to ${{ matrix.to }}
+        env:
+          TZ: Asia/Dubai
+        run: |
+          git config user.name "Hassan Ali"
+          git config user.email "hassanaliarshad110@users.noreply.github.com"
+          save() {
+            git add data
+            if git diff --cached --quiet; then return 0; fi
+            git commit -q -m "History: ${{ matrix.kind }} ${{ matrix.from }} to ${{ matrix.to }}"
+            for i in 1 2 3 4 5 6; do git pull --rebase -q -X theirs && git push -q && return 0; sleep $((RANDOM % 20 + 5)); done
+          }
+          for round in $(seq 1 13); do
+            set +e; python pipeline/dld.py --only ${{ matrix.kind }} --since ${{ matrix.from }} --rent-since ${{ matrix.from }} --until ${{ matrix.to }} --budget-min 25; code=$?; set -e
+            save
+            [ "$code" -eq 10 ] || break
+          done

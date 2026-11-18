@@ -254,6 +254,7 @@ def main():
     ap.add_argument('--rent-since', default='2023-01')
     ap.add_argument('--budget-min', type=float, default=120)
     ap.add_argument('--only', choices=['tx', 'rent'])
+    ap.add_argument('--until', help='last month to pull (YYYY-MM); default this month')
     a = ap.parse_args()
     start = time.time()
     unfinished = False
@@ -267,7 +268,7 @@ def main():
             since = max(since, open(stop).read().strip())
         # transactions get two-thirds of the time on the first pass, rents what is left
         dl = deadline if kind == 'rent' else start + a.budget_min * 60 * (0.6 if not a.only else 1)
-        if not run(kind, months_between(since, today), fn, dl):
+        if not run(kind, months_between(since, a.until or today), fn, dl):
             unfinished = True
     log(f'done in {(time.time() - start) / 60:.1f} min')
     sys.exit(10 if unfinished else 0)      # 10: more months still to pull
