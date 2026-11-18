@@ -256,6 +256,7 @@ def main():
     ap.add_argument('--only', choices=['tx', 'rent'])
     a = ap.parse_args()
     start = time.time()
+    unfinished = False
     deadline = start + a.budget_min * 60
     today = date.today().strftime('%Y-%m')
     for kind, since, fn in [('tx', a.since, tx_month), ('rent', a.rent_since, rent_month)]:
@@ -266,8 +267,10 @@ def main():
             since = max(since, open(stop).read().strip())
         # transactions get two-thirds of the time on the first pass, rents what is left
         dl = deadline if kind == 'rent' else start + a.budget_min * 60 * (0.6 if not a.only else 1)
-        run(kind, months_between(since, today), fn, dl)
+        if not run(kind, months_between(since, today), fn, dl):
+            unfinished = True
     log(f'done in {(time.time() - start) / 60:.1f} min')
+    sys.exit(10 if unfinished else 0)      # 10: more months still to pull
 
 
 if __name__ == '__main__':
