@@ -1,0 +1,54 @@
+/* Dubai Insight: additions to the shared design system (styles.css) */
+:root { --gold: #C8922B; }
+
+/* grid columns used as wrappers */
+.grid > [class^="col-"] { min-width: 0; display: flex; flex-direction: column; }
+.grid > [class^="col-"] > .card { flex: 1; }
+.col-3 { grid-column: span 3; } .col-4 { grid-column: span 4; } .col-6 { grid-column: span 6; }
+.col-8 { grid-column: span 8; } .col-12 { grid-column: span 12; }
+@media (max-width: 1100px) { .col-4, .col-3 { grid-column: span 6; } .col-8 { grid-column: span 12; } }
+@media (max-width: 760px) { .col-3, .col-4, .col-6, .col-8 { grid-column: span 12; } }
+
+/* changes: neither good nor bad for prices, so blue for up and amber for down */
+.chg.up { color: var(--accent); background: var(--accent-soft); }
+.chg.down { color: var(--warn); background: var(--warn-soft); }
+
+.chart-box { position: relative; width: 100%; }
+.kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .kpis { grid-template-columns: 1fr; } }
+.kpis + .kpis { margin-top: var(--gap); }
+.kpi .kpi-value { font-size: 23px; }
+.fig-card .kpi-foot, .kpi-foot { line-height: 1.45; }
+.src a, .foot-src a, .card-sub a, .meta a, .prose a { color: var(--accent); text-decoration: none; }
+.src a:hover, .foot-src a:hover, .card-sub a:hover, .meta a:hover, .prose a:hover { text-decoration: underline; }
+.foot-src { margin: 18px 2px 0; font-size: 12px; color: var(--muted-fg); line-height: 1.5; }
+
+/* tables */
+.tbl-tools { display: flex; gap: 8px; margin: 0 0 10px; }
+.tbl-tools input { flex: 0 1 280px; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); }
+table.data th.has-sort .th-sort { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 9px 12px; cursor: pointer; font: inherit; color: inherit; }
+table.data th.num .th-sort { text-align: right; }
+table.data th .th-sort.on { color: var(--accent); }
+table.data th .th-sort:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+table.data.wrap td { white-space: normal; height: auto; }
+.area-link { color: var(--accent); font-weight: 500; }
+table.data.cmp th[scope="row"] { position: static; background: none; font-weight: 500; color: var(--fg-2); border-bottom: 1px solid var(--border); }
+.panel .table-scroll { max-height: 320px; }
+
+.cmp-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cmp-pick select { padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); min-width: 220px; }
+.cmp-pick span { color: var(--muted-fg); }
+.rank-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+@media (max-width: 760px) { .rank-stats { grid-template-columns: 1fr 1fr; } }
+
+.prose { max-width: 820px; line-height: 1.65; font-size: 14.5px; color: var(--fg-2); }
+.prose h2 { font-size: 17px; color: var(--fg); margin: 22px 0 8px; }
+.prose h2:first-child { margin-top: 4px; }
+.prose p { margin: 0 0 12px; }
+.prose ul { margin: 0 0 12px; padding-left: 20px; }
+.prose li { margin: 0 0 6px; }
+.empty-note { padding: 28px; text-align: center; color: var(--muted-fg); background: var(--card); border: 1px dashed var(--border-strong); border-radius: var(--r); }
+.skel { height: 240px; border-radius: var(--r); background: linear-gradient(90deg, var(--muted) 0%, var(--muted-2) 50%, var(--muted) 100%); background-size: 200% 100%; animation: skel 1.4s ease infinite; }
+@keyframes skel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
