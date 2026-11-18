@@ -100,11 +100,11 @@ def main():
         sha = hashlib.sha256(text.encode()).hexdigest()
         fn = os.path.join(OUT, key + '.json')
         old = json.load(open(fn)) if os.path.exists(fn) else None
-        if old and old.get('sha256') == sha and old.get('v') == 2:
+        if old and old.get('sha256') == sha and old.get('v') == 3:
             print('same', key, flush=True); continue
         pre, arts = split_articles(text)
-        json.dump({'v': 2, 'id': key, 'title': title, 'url': url, 'fetched': time.strftime('%Y-%m-%d'), 'sha256': sha,
-                   'preamble': pre[:4000], 'articles': arts, 'text_chars': len(text)},
+        json.dump({'v': 3, 'id': key, 'title': title, 'url': url, 'fetched': time.strftime('%Y-%m-%d'), 'sha256': sha,
+                   'preamble': pre if not arts else pre[:4000], 'articles': arts, 'text_chars': len(text)},
                   open(fn, 'w'), ensure_ascii=False, indent=1)
         print(('CHANGED ' if old else 'new ') + key, len(arts), 'articles', len(text), 'chars', flush=True)
         if old: changed.append(key)
