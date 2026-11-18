@@ -839,6 +839,7 @@ function openAsk(only) {
     <p class="drawer-note" id="ask-msg" aria-live="polite"></p>
     <details class="ask-see"><summary>See exactly what will be sent</summary><pre id="ask-pre"></pre></details>
     <p class="drawer-note">Your question and this page's figures go straight from your browser to the AI you pick. Dubai Insight doesn't see or keep them. AI answers can be wrong: check them against the figures and the official sources.</p>
+    <p class="drawer-note"><a href="#connect">${icon('cpu')} Use Dubai Insight inside Claude or ChatGPT every time</a> with the connector.</p>
     <p class="drawer-note"><a href="ai/dubai-insight.md" download="dubai-insight.md">${icon('download')} Download all of Dubai Insight's data as one file</a> to attach to any AI chat.</p>
   </aside>`;
   document.body.appendChild(d);
@@ -867,16 +868,49 @@ function openAsk(only) {
 function closeAsk() { if (ASK) { ASK.remove(); ASK = null; } }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAsk(); });
 
+/* --------------------------------------------------------------- CONNECT YOUR AI (the MCP connector) */
+let CONN = null;
+function viewConnect() {
+  head('connect', 'Connect your AI', 'Use all of Dubai Insight inside Claude, ChatGPT or any AI app that supports connectors (MCP).');
+  const url = CONN && CONN.url;
+  const urlBox = url ? `<div class="conn-url"><code id="conn-url">${esc(url)}</code><button type="button" class="btn" id="conn-copy">${icon('file')}<span>Copy</span></button></div><p class="drawer-note" id="conn-msg" aria-live="polite"></p>`
+    : `<p class="empty-note" style="padding:16px">The connector's address will appear here once it is switched on.</p>`;
+  const tools = [['Dubai at a glance', 'sales, prices, off-plan share, rents and official figures'], ['Any area', 'its sales, price per m², every month, rank and rents (everyday names like JVC or Downtown work)'],
+    ['Rank and compare areas', 'by price, sales, off-plan share or rent'], ['Month by month', 'every month since 2019'], ['Market breakdown', 'property types, price bands, flat sizes, top projects'],
+    ['Rents', 'Ejari contracts by month and area'], ['Official figures', 'population, transport, schools, business, tourism'], ['Rent increase check', 'the decree\'s cap with the working'],
+    ['Property law', 'plain-language answers and the full text of every article']];
+  body('connect', `
+    <div class="grid">
+      <div class="col-12">${card('What it does', 'A connector lets an AI look things up in Dubai Insight while it answers you, instead of guessing. Ask in your own words; the AI picks what it needs, and every answer comes with the figure, period and source.',
+        `<ul class="conn-tools">${tools.map(([a, b]) => `<li>${icon('check')}<span><strong>${a}</strong> ${b}</span></li>`).join('')}</ul>`)}</div>
+      <div class="col-12">${card('The connector address', 'Paste this into your AI app as described below. No account or sign-in is needed, and it only reads public data.', urlBox)}</div>
+      <div class="col-6">${card('Claude', 'Works on every plan; the free plan allows one custom connector.', `<ol class="conn-steps">
+        <li>In Claude on the web or desktop, open <strong>Settings</strong> (or <strong>Customize</strong>) and then <strong>Connectors</strong>.</li>
+        <li>Choose <strong>Add custom connector</strong>.</li>
+        <li>Name it <strong>Dubai Insight</strong> and paste the address above. Leave the sign-in settings empty.</li>
+        <li>Choose <strong>Add</strong>. In a chat, make sure Dubai Insight is switched on in the <strong>+</strong> menu, then ask your question.</li></ol>`)}</div>
+      <div class="col-6">${card('ChatGPT', 'Needs a paid plan and developer mode, on the web.', `<ol class="conn-steps">
+        <li>Open <strong>Settings</strong>, then <strong>Apps</strong> (or <strong>Apps &amp; Connectors</strong>), then <strong>Advanced settings</strong>, and turn on <strong>Developer mode</strong>. On some accounts it is under <strong>Security</strong>.</li>
+        <li>Choose <strong>Create</strong> (or <strong>Create app</strong>).</li>
+        <li>Name it <strong>Dubai Insight</strong>, paste the address above, choose <strong>No authentication</strong>, tick that you trust it, and create it.</li>
+        <li>In a chat, add Dubai Insight from the <strong>+</strong> menu and ask your question.</li></ol>`)}</div>
+      <div class="col-12">${card('Try asking', '', `<div class="ask-sugg">${['Which areas have flats under AED 15,000 per square metre with mostly ready sales?', 'How has Business Bay changed this year, and how do its rents compare with JLT?', 'My rent is AED 85,000 and the index average is AED 100,000. How much can it go up?', 'Can my building manager block my access card over unpaid service charges?', 'Show Dubai sales month by month for 2025 and explain the trend'].map(q => `<span class="chip">${esc(q)}</span>`).join('')}</div>`)}</div>
+    </div>
+    <p class="foot-src">Menu names in Claude and ChatGPT change from time to time; if a step looks different, look for "connectors", "apps" or "developer mode". The connector is read-only and keeps nothing you ask. AI answers can be wrong: check them against the figures and the official sources. Information only, not advice.</p>`);
+  const c = $('#conn-copy');
+  if (c) c.addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); $('#conn-msg').textContent = 'Copied.'; } catch (e) { $('#conn-msg').textContent = 'Select the address and copy it.'; } });
+}
+
 function loadingNote(what) { return `<p class="empty-note">${what || 'Property figures'} are not available right now. Please try again later.</p>`; }
 
 const VIEWS = { dashboard: viewDashboard, sales: viewSales, rents: viewRents, areas: viewAreas, population: viewPopulation, transport: viewTransport,
   schools: viewSchools, business: viewBusiness, tourism: viewTourism, methods: viewMethods, sources: viewSources, about: viewAbout,
-  rentcheck: viewRentcheck, laws: viewLaws };
+  rentcheck: viewRentcheck, laws: viewLaws, connect: viewConnect };
 
 /* --------------------------------------------------------------- start */
 async function load() {
   const get = u => fetch(u, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
-  [RE, OFF, LAWS] = await Promise.all([get('data/realestate.json'), get('data/official.json'), get('data/laws.json')]);
+  [RE, OFF, LAWS, CONN] = await Promise.all([get('data/realestate.json'), get('data/official.json'), get('data/laws.json'), get('data/connector.json')]);
   const st = $('#side-status');
   st.classList.toggle('ok', !!RE);
   st.classList.toggle('stale', !RE);

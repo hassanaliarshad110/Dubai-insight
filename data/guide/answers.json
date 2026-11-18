@@ -175,7 +175,10 @@
     "demolition",
     "renovation",
     "notary",
-    "registered mail"
+    "registered mail",
+    "sell",
+    "selling",
+    "buyer"
    ]
   },
   {
@@ -227,7 +230,10 @@
     "sale",
     "new owner",
     "sold",
-    "transfer"
+    "transfer",
+    "sell",
+    "selling",
+    "buyer"
    ]
   },
   {
@@ -514,7 +520,10 @@
     "lien",
     "auction",
     "RDSC",
-    "30 days"
+    "30 days",
+    "not paid",
+    "late",
+    "owner"
    ]
   },
   {

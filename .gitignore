@@ -6,3 +6,4 @@ discovery.json
 site/data/
 site/ai/
 site/llms.txt
+connector/data.js

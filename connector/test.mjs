@@ -1,0 +1,91 @@
+// Tests the connector the way Claude and ChatGPT talk to it: node connector/test.mjs (after build_data.py).
+import worker, { tools } from './worker.js';
+
+let fails = 0;
+const check = (cond, what) => { if (!cond) { fails++; console.log('FAIL', what); } else console.log('ok  ', what); };
+const call = async (body, method = 'POST', path = '/mcp') => {
+  const r = await worker.fetch(new Request('https://x.workers.dev' + path, { method, headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' }, body: method === 'POST' ? JSON.stringify(body) : undefined }), { SITE_URL: 'https://example.org/dubai-insight/' }, {});
+  const t = await r.text();
+  let out = null; try { out = t ? JSON.parse(t) : null; } catch (e) { out = t; }
+  return { status: r.status, body: out, headers: r.headers };
+};
+const tool = async (name, args) => {
+  const r = await call({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name, arguments: args } });
+  const res = r.body.result;
+  return { res, data: res.structuredContent || (() => { try { return JSON.parse(res.content[0].text); } catch (e) { return res.content[0].text; } })() };
+};
+
+const init = await call({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'test', version: '1' } } });
+check(init.status === 200 && init.body.result.protocolVersion === '2025-06-18', 'initialize echoes a supported protocol version');
+check(init.body.result.capabilities.tools && init.body.result.serverInfo.name === 'dubai-insight', 'initialize: tools capability and server name');
+check(init.headers.get('access-control-allow-origin') === '*', 'CORS header');
+const old = await call({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '1999-01-01' } });
+check(old.body.result.protocolVersion === '2025-11-25', 'unknown protocol version answered with the latest');
+const note = await call({ jsonrpc: '2.0', method: 'notifications/initialized' });
+check(note.status === 202 && note.body === null, 'notification gets 202 and no body');
+const list = await call({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
+const names = list.body.result.tools.map(t => t.name);
+check(names.length === tools.length && names.includes('search') && names.includes('fetch'), `tools/list gives ${names.length} tools incl. search and fetch`);
+check(list.body.result.tools.every(t => t.inputSchema && t.inputSchema.type === 'object' && t.description.length > 40 && t.annotations.readOnlyHint), 'every tool has a schema, a description and is read-only');
+check((await call({ jsonrpc: '2.0', id: 3, method: 'ping' })).body.result !== undefined, 'ping');
+check((await call({ jsonrpc: '2.0', id: 4, method: 'nope' })).body.error.code === -32601, 'unknown method: -32601');
+check((await call({ jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'nope' } })).body.error.code === -32602, 'unknown tool: -32602');
+const batch = await call([{ jsonrpc: '2.0', id: 6, method: 'ping' }, { jsonrpc: '2.0', method: 'notifications/initialized' }, { jsonrpc: '2.0', id: 7, method: 'tools/list' }]);
+check(Array.isArray(batch.body) && batch.body.length === 2, 'batch: two answers, the notification skipped');
+check((await call(null, 'GET')).status === 405, 'GET /mcp: 405');
+check((await call(null, 'GET', '/')).status === 200, 'GET /: a short text page');
+const bad = await worker.fetch(new Request('https://x/mcp', { method: 'POST', body: '{nope' }), {}, {});
+check((await bad.json()).error.code === -32700, 'bad JSON: parse error');
+
+const ov = (await tool('dubai_overview', {})).data;
+check(ov.sales_last_12_months.sales > 100000 && ov.busiest_areas.areas.length === 10, `overview: ${ov.sales_last_12_months.sales} sales, 10 busiest areas`);
+const f = (await tool('find_area', { query: 'jvc' })).data;
+check(f.matches[0].area === 'Jumeirah Village Circle', 'find_area: JVC is Jumeirah Village Circle');
+check((await tool('find_area', { query: 'downtown' })).data.matches[0].area === 'Burj Khalifa', 'find_area: Downtown is Burj Khalifa');
+const bb = (await tool('area_profile', { area: 'business bay' })).data;
+const p = bb.profiles[0];
+check(p.area === 'Business Bay' && p.sales.sales > 1000 && p.sales.by_month.length >= 10 && p.sales.rank.by_sales.rank > 0, `area_profile Business Bay: ${p.sales.sales} sales, rank ${p.sales.rank.by_sales.rank}`);
+check(typeof p.rents === 'object' && p.rents.contracts > 0, 'area_profile: rents');
+const mar = (await tool('area_profile', { area: 'marina' })).data;
+check(mar.profiles.length === 2, 'area_profile Marina: both Land Department names');
+const nf = await tool('area_profile', { area: 'zzzz' });
+check(nf.res.isError === true && /No area matches/.test(nf.res.content[0].text), 'unknown area: a tool error the model can read');
+const rk = (await tool('rank_areas', { measure: 'price_per_sqm_flat', limit: 5 })).data;
+check(rk.areas.length === 5 && rk.areas[0].price_per_sqm_flat_aed >= rk.areas[4].price_per_sqm_flat_aed, `rank_areas: dearest flats first (${rk.areas[0].area})`);
+const lo = (await tool('rank_areas', { measure: 'rent_flat', order: 'lowest', limit: 3 })).data;
+check(lo.areas.length === 3 && lo.areas[0].typical_yearly_rent_flat_aed <= lo.areas[2].typical_yearly_rent_flat_aed, `rank_areas: cheapest flat rents first (${lo.areas[0].area})`);
+const cmp = (await tool('compare_areas', { areas: ['Business Bay', 'JLT', 'nowhere'] })).data;
+check(cmp.areas.length === 2 && cmp.not_found[0] === 'nowhere', 'compare_areas: two found, one not');
+const sm = (await tool('sales_by_month', { from: '2025-01', to: '2025-12' })).data;
+check(sm.months.length === 12 && sm.months[0].month === 'Jan 2025', 'sales_by_month: 2025 has 12 months');
+const mb = (await tool('market_breakdown', {})).data;
+check(mb.by_property_type.length && mb.by_price_band_aed.length && mb.projects_with_most_sales.projects.length === 25, 'market_breakdown: types, bands, projects');
+const rn = (await tool('rents', { area: 'Business Bay' })).data;
+check(rn.areas[0].contracts > 0 && rn.months.length > 0, 'rents: Business Bay');
+const of = (await tool('official_figures', { topic: 'population' })).data;
+check(of.figures.length > 0 && of.figures.every(x => x.topic === 'population' && x.url), 'official_figures: population, each with a source link');
+const rc = (await tool('rent_increase_check', { current_rent: 80000, average_rent: 100000, lease_end_date: '2027-03-31' })).data;
+check(rc.max_increase_pct === 5 && rc.max_new_rent_aed === 84000 && rc.last_day_for_notice === '2026-12-31', 'rent_increase_check: 20% below = 5%, notice by 31 Dec 2026');
+check((await tool('rent_increase_check', { current_rent: 50000, average_rent: 100000 })).data.max_increase_pct === 20, 'rent_increase_check: 50% below = 20%');
+check((await tool('rent_increase_check', { current_rent: 120000, average_rent: 100000 })).data.max_increase_pct === 0, 'rent_increase_check: above the average = none');
+check((await tool('rent_increase_check', { current_rent: 91000, average_rent: 100000 })).data.max_increase_pct === 0, 'rent_increase_check: 9% below = none');
+const sl = (await tool('search_law', { query: 'landlord wants to sell the flat eviction' })).data;
+check(sl.answers.some(a => a.id === 'evict-expiry' || a.id === 'sold'), `search_law: sale eviction found (${sl.answers.map(a => a.id).join(', ')})`);
+const sc = (await tool('search_law', { query: 'service charge not paid', topic: 'owning' })).data;
+check(sc.answers[0] && sc.answers[0].topic === 'owning' && sc.articles.length, `search_law: service charges (${sc.answers.map(a => a.id).join(', ')})`);
+const ar = (await tool('get_law_article', { law: 'tenancy', article: 25 })).data;
+check(/twelve \(12\) months/.test(ar.text) && ar.amended_by === 'Law No. 33 of 2008', 'get_law_article: tenancy 25, as amended, with the 12 months');
+check((await tool('get_law_article', { law: 'jointly' })).data.articles.length > 40, 'get_law_article: list of the jointly owned property law');
+check((await tool('get_law_article', { law: 'tenancy', article: 99 })).res.isError, 'get_law_article: missing article is an error');
+const s = (await tool('search', { query: 'Business Bay rent deposit' })).data;
+check(s.results.some(r => r.id === 'area:Business Bay') && s.results.some(r => r.id === 'answer:deposit'), 'search: area and law answer');
+const fe = (await tool('fetch', { id: 'answer:deposit' })).data;
+check(fe.id === 'answer:deposit' && fe.text.includes('deposit') && fe.url.startsWith('https://'), 'fetch: a law answer as a document');
+const fa = (await tool('fetch', { id: 'area:Business Bay' })).data;
+check(fa.url.startsWith('https://example.org/dubai-insight/#areas/'), 'fetch: an area links to the site');
+check((await tool('fetch', { id: 'overview' })).data.text.includes('sales_last_12_months'), 'fetch: overview');
+const big = await call({ jsonrpc: '2.0', id: 10, method: 'tools/call', params: { name: 'rank_areas', arguments: { measure: 'sales', limit: 300 } } });
+check(big.body.result.content[0].text.length < 61000, 'long answers stay under the size limit');
+
+console.log(fails ? `\n${fails} FAILED` : '\nall passed');
+process.exit(fails ? 1 : 0);

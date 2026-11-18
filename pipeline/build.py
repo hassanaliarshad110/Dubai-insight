@@ -196,6 +196,12 @@ def main():
         o['built'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         json.dump(o, open(os.path.join(OUT, 'official.json'), 'w'), separators=(',', ':'), ensure_ascii=False)
         print('official.json', len(o.get('figures', [])), 'figures')
+    cu = os.environ.get('CONNECTOR_URL', '').strip()      # the connector's address, once it is switched on (repo variable)
+    cf = os.path.join(OUT, 'connector.json')
+    if cu:
+        json.dump({'url': cu.rstrip('/') + ('' if cu.rstrip('/').endswith('/mcp') else '/mcp')}, open(cf, 'w'))
+    elif os.path.exists(cf):
+        os.remove(cf)
     import lawlib
     lawlib.main()
     import aiexport

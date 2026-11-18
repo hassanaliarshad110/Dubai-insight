@@ -30,6 +30,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python pipeline/build.py
+        env:
+          CONNECTOR_URL: ${{ vars.CONNECTOR_URL }}
       - name: Check the site's data
         run: |
           test -s site/data/official.json

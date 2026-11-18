@@ -1,0 +1,60 @@
+name: Connector
+
+# Builds the Dubai Insight connector (connector/, an MCP server for Claude, ChatGPT and other AI apps) with the latest
+# data, tests it, and deploys it to Cloudflare Workers. It only deploys once the repository has the secret
+# CLOUDFLARE_API_TOKEN (an "Edit Cloudflare Workers" token) and the variable PUBLISH_CONNECTOR set to "true";
+# until then it builds and tests only.
+on:
+  workflow_run:
+    workflows: ['Refresh data']
+    types: [completed]
+  push:
+    branches: [main]
+    paths: ['connector/**', 'pipeline/**', 'data/guide/**', 'data/laws/**', 'data/official.json', '.github/workflows/connector.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connector
+  cancel-in-progress: false
+
+jobs:
+  connector:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PUBLISH: ${{ vars.PUBLISH_CONNECTOR }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build the data
+        run: |
+          python pipeline/build.py
+          python connector/build_data.py
+      - name: Test
+        run: node connector/test.mjs
+      - name: Deploy
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.PUBLISH == 'true'
+        working-directory: connector
+        run: |
+          set -e
+          T="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | grep -oE 'Bearer[[:space:]]+[A-Za-z0-9_-]+' | tail -1 | awk '{print $2}')"
+          [ -n "$T" ] && CLOUDFLARE_API_TOKEN="$T"
+          CLOUDFLARE_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | tr -d '[:space:]')"; export CLOUDFLARE_API_TOKEN
+          V=""; [ -n "$SITE_URL" ] && V="--var SITE_URL:$SITE_URL"
+          npx --yes wrangler@3.99.0 deploy $V | tee deploy.txt
+          U=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.txt | head -1)
+          echo "Connector address: $U/mcp"
+          echo "### Connector address: $U/mcp" >> "$GITHUB_STEP_SUMMARY"
+          curl -s -X POST "$U/mcp" -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);console.log('Live check:',j.result.tools.length,'tools')})"
+      - name: Not deployed
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.PUBLISH != 'true'
+        run: echo "Built and tested. Not deployed (needs the CLOUDFLARE_API_TOKEN secret and PUBLISH_CONNECTOR=true)."
