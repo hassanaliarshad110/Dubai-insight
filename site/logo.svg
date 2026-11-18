@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Dubai Insight">
+  <!-- a lens (insight) over bars of data rising into the Burj Khalifa --><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12345E"/><stop offset="1" stop-color="#081530"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9E2A6"/><stop offset="1" stop-color="#D19A33"/></linearGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7DD3FC"/><stop offset="1" stop-color="#0EA5E9"/></linearGradient>
+<linearGradient id="ice" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6E8F7"/></linearGradient>
+</defs><rect width="256" height="256" rx="58" fill="url(#bg)"/>
+<clipPath id="lens"><circle cx="112" cy="112" r="62"/></clipPath>
+<circle cx="112" cy="112" r="62" fill="#0B2547"/>
+<g clip-path="url(#lens)">
+ <path d="M40 156 L70 130 L90 142 L118 116 L150 146 L190 124 L190 190 L40 190 Z" fill="#1E4C80"/>
+ <rect x="58" y="138" width="16" height="30" rx="3" fill="url(#sky)"/>
+ <rect x="80" y="124" width="16" height="44" rx="3" fill="url(#sky)"/>
+ <rect x="102" y="110" width="16" height="58" rx="3" fill="url(#sky)"/>
+ <!-- Burj Khalifa: stepped setbacks narrowing to the spire -->
+ <path d="M128 168 L130 140 L133 140 L134 118 L137 118 L138 98 L141 98 L142 80 L144 80 L145 62 L146.5 46 L148 62 L149 80 L151 80 L152 98 L155 98 L156 118 L159 118 L160 140 L163 140 L165 168 Z" fill="url(#ice)"/>
+ <path d="M145.5 66 L147.5 66 L148.5 160 L144.5 160 Z" fill="#C9DDF1" opacity=".7"/>
+ <rect x="131" y="139" width="31" height="2.5" fill="url(#gold)"/>
+</g>
+<circle cx="112" cy="112" r="62" fill="none" stroke="url(#gold)" stroke-width="14"/>
+<path d="M159 159 L204 204" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
+</svg>
