@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['pipeline/discover.py', 'pipeline/probe.py', '.github/workflows/discover.yml']
+    paths: ['pipeline/probe.py', '.github/workflows/discover.yml']
 
 permissions:
   contents: read
