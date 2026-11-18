@@ -34,8 +34,13 @@ def fetch(path):
         try:
             with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=60) as r:
                 raw = r.read()
-                enc = r.headers.get_content_charset() or 'utf-8'
-                return u, raw.decode(enc, 'replace')
+                for enc in (r.headers.get_content_charset(), 'utf-8', 'cp1252'):
+                    if not enc: continue
+                    try:
+                        return u, raw.decode(enc)
+                    except (UnicodeDecodeError, LookupError):
+                        pass
+                return u, raw.decode('cp1252', 'replace')
         except Exception as e:
             last = e
     raise RuntimeError(f'{path}: {last}')
@@ -43,6 +48,7 @@ def fetch(path):
 
 def to_text(h):
     h = re.sub(r'(?is)<(script|style|head)[^>]*>.*?</\1>', ' ', h)
+    h = re.sub(r'\s+', ' ', h)                    # line breaks in the HTML source are not line breaks in the text
     h = re.sub(r'(?i)<br\s*/?>', '\n', h)
     h = re.sub(r'(?i)</(p|div|tr|li|h\d|table)>', '\n', h)
     h = re.sub(r'(?i)<td[^>]*>', ' ', h)
@@ -63,11 +69,21 @@ def to_text(h):
 def split_articles(text):
     parts = re.split(r'\n(?=Article\s*\(\s*\d+\s*\)\s*\n)', '\n' + text)
     arts, preamble = [], parts[0].strip()
+    heading = ''
+    pre_lines = preamble.split('\n')
+    if pre_lines and 0 < len(pre_lines[-1]) < 70 and not pre_lines[-1].endswith(('.', ',', ';', ':')):
+        heading = pre_lines[-1]; preamble = '\n'.join(pre_lines[:-1]).strip()
     for p in parts[1:]:
         m = re.match(r'Article\s*\(\s*(\d+)\s*\)\s*\n', p)
         body = p[m.end():].strip()
-        # the heading above an article is the last short line of the previous block; keep the body as is
-        arts.append({'no': int(m.group(1)), 'text': body})
+        lines = body.split('\n')
+        nxt = ''
+        # the heading of the next article sits at the end of this one: a short line with no full stop
+        if len(lines) > 1 and 0 < len(lines[-1]) < 70 and not lines[-1].endswith(('.', ',', ';', ':')) and not re.match(r'^[a-z0-9]+\.\s', lines[-1]):
+            nxt = lines[-1]; body = '\n'.join(lines[:-1]).strip()
+        body = re.split(r'\n(?:©|\u00a9)?\s*\d{4} The Supreme Legislation Committee|\n\[1\]Every effort', body)[0].strip()
+        arts.append({'no': int(m.group(1)), 'heading': heading, 'text': body})
+        heading = nxt
     return preamble, arts
 
 
@@ -84,10 +100,10 @@ def main():
         sha = hashlib.sha256(text.encode()).hexdigest()
         fn = os.path.join(OUT, key + '.json')
         old = json.load(open(fn)) if os.path.exists(fn) else None
-        if old and old.get('sha256') == sha:
+        if old and old.get('sha256') == sha and old.get('v') == 2:
             print('same', key, flush=True); continue
         pre, arts = split_articles(text)
-        json.dump({'id': key, 'title': title, 'url': url, 'fetched': time.strftime('%Y-%m-%d'), 'sha256': sha,
+        json.dump({'v': 2, 'id': key, 'title': title, 'url': url, 'fetched': time.strftime('%Y-%m-%d'), 'sha256': sha,
                    'preamble': pre[:4000], 'articles': arts, 'text_chars': len(text)},
                   open(fn, 'w'), ensure_ascii=False, indent=1)
         print(('CHANGED ' if old else 'new ') + key, len(arts), 'articles', len(text), 'chars', flush=True)
