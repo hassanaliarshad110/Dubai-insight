@@ -4,22 +4,18 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['pipeline/discover.py', '.github/workflows/discover.yml']
+    paths: ['pipeline/discover.py', 'pipeline/probe.py', '.github/workflows/discover.yml']
 
 permissions:
   contents: read
 
 jobs:
-  discover:
+  probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python pipeline/discover.py discovery.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: discovery
-          path: discovery.json
+      - run: python pipeline/probe.py
