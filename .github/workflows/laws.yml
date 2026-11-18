@@ -1,0 +1,31 @@
+name: Laws
+
+# Weekly: downloads the official English texts from the Dubai Legal Portal and keeps them in data/laws/.
+# A change to a law shows as CHANGED in the log so the plain-language answers citing it can be checked again.
+on:
+  schedule:
+    - cron: '41 2 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['pipeline/laws.py', '.github/workflows/laws.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  laws:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python pipeline/laws.py
+      - run: |
+          git config user.name "Hassan Ali"
+          git config user.email "hassanaliarshad110@users.noreply.github.com"
+          git add data/laws
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Law texts from the Dubai Legal Portal $(date +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do git pull --rebase -q -X theirs && git push -q && break; sleep 15; done
