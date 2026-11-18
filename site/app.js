@@ -152,6 +152,8 @@ function figValue(f) {
   if (f.unit === 'AED') return f.value >= 1e6 ? aed(f.value) : 'AED ' + fmt(f.value);
   return big(f.value);
 }
+const AS = () => RE && RE.area_span ? span(RE.area_span.from, RE.area_span.to) : '';
+const COPY_NOTE = () => RE && RE.copy_source ? `Months before ${mlong(RE.api_first)} come from <a href="${esc(RE.copy_source.url)}" target="_blank" rel="noopener">a public copy of the Land Department's records</a> (CC BY 4.0).` : '';
 const DLD_SRC = () => `<a href="https://dubailand.gov.ae/en/open-data/real-estate-data/" target="_blank" rel="noopener">Dubai Land Department open data</a>`;
 function partialNote() {
   const m = RE && RE.monthly.find(r => r.partial);
@@ -200,11 +202,11 @@ function viewDashboard() {
     <div class="kpis" style="margin-top:var(--gap)">${k2}</div>
     ${RE ? `<div class="grid" style="margin-top:var(--gap)">
       <div class="col-8">${card('Property sales every month', `Number of sales (bars) and their total value (line). ${partialNote()}`, canvas('d-sales', 300))}</div>
-      <div class="col-4">${card('Busiest areas for sales', `${span(L.from, L.to)}. Select an area for its profile.`, `<div class="table-scroll"><table class="data" id="d-areas"></table></div>`, 'panel')}</div>
+      <div class="col-4">${card('Busiest areas for sales', `${AS()}. Select an area for its profile.`, `<div class="table-scroll"><table class="data" id="d-areas"></table></div>`, 'panel')}</div>
       <div class="col-6">${card('Price per square metre', 'Median of each month\'s sales, flats and villas, AED', canvas('d-pp', 260))}</div>
       <div class="col-6">${card('Off-plan and ready', 'Share of each month\'s sales', canvas('d-off', 260))}</div>
     </div>` : ''}
-    <p class="foot-src">Property: ${DLD_SRC()}, every sale registered in Dubai. Other figures: official releases, each linked to its source. <a href="#methods">How it's counted</a></p>`);
+    <p class="foot-src">Property: ${DLD_SRC()}, every sale registered in Dubai. ${COPY_NOTE()} Other figures: official releases, each linked to its source. <a href="#methods">How it's counted</a></p>`);
   if (!RE) return;
   const M = RE.monthly.slice(-37), p = palette();
   chart('d-sales', {
@@ -229,7 +231,7 @@ function viewDashboard() {
   sortable('d-areas', areas, [
     { k: 'name', t: 'Area', f: v => `<span class="area-link">${esc(v)}</span>` },
     { k: 'sales', t: 'Sales', num: true, f: v => fmt(v) },
-    { k: 'sales_chg', t: 'vs year before', num: true, f: v => chg(v) }], n => go('areas', n), 'sales');
+    { k: 'ppsqm_flat', t: 'Flats AED/m²', num: true, f: (v, r) => r.n_flat >= 10 ? fmt(v) : '–' }], n => go('areas', n), 'sales');
 }
 function ppChart(id, M) {
   const p = palette();
@@ -257,15 +259,15 @@ function viewSales() {
     <div class="grid" style="margin-top:var(--gap)">
       <div class="col-12">${card('Sales every month, off-plan and ready', partialNote(), canvas('s-month', 300))}</div>
       <div class="col-6">${card('Price per square metre', 'Median of each month\'s sales, AED per m²', canvas('s-pp', 260))}</div>
-      <div class="col-6">${card('Mortgages and gifts', 'Mortgages registered on property, and property given as a gift, each complete month', canvas('s-mg', 260))}</div>
+      <div class="col-6">${card('Mortgages and gifts', `Mortgages registered on property, and property given as a gift, each complete month since ${mlong(RE.api_first)}`, canvas('s-mg', 260))}</div>
       <div class="col-4">${card('What sells', `Sales by property type, ${span(L.from, L.to)}`, `<div class="table-scroll"><table class="data" id="s-type"></table></div>`)}</div>
       <div class="col-4">${card('Price bands', `How many sales at each price in AED, ${span(L.from, L.to)}`, canvas('s-bands', 240))}</div>
       <div class="col-4">${card('Flats by size', `Flat sales by number of bedrooms, ${span(L.from, L.to)}`, canvas('s-rooms', 240))}</div>
-      <div class="col-12">${card('Every area', `${span(L.from, L.to)} against the 12 months before. Typical price per m² is the average of monthly medians, weighted by the number of sales. Select an area for its profile.`,
+      <div class="col-12">${card('Every area', `${AS()}. Areas are the Land Department's own names. Typical price per m² is the average of monthly medians, weighted by the number of sales. Select an area for its profile.`,
         `<div class="tbl-tools"><input type="search" id="s-q" placeholder="Find an area" aria-label="Find an area"></div><div class="table-wrap"><table class="data" id="s-areas"></table></div>`)}</div>
-      <div class="col-12">${card('Projects with the most sales', span(L.from, L.to), `<div class="table-wrap"><table class="data" id="s-proj"></table></div>`)}</div>
+      <div class="col-12">${card('Projects with the most sales', AS(), `<div class="table-wrap"><table class="data" id="s-proj"></table></div>`)}</div>
     </div>
-    <p class="foot-src">Source: ${DLD_SRC()}. Sales include off-plan sales registered before completion. <a href="#methods">How it's counted</a></p>`);
+    <p class="foot-src">Source: ${DLD_SRC()}. ${COPY_NOTE()} Sales include off-plan sales registered before completion. <a href="#methods">How it's counted</a></p>`);
   const M = RE.monthly.slice(-37), p = palette();
   chart('s-month', {
     type: 'bar', data: { labels: M.map(r => ml(r.m)), datasets: [
@@ -293,11 +295,10 @@ function viewSales() {
   const cols = [
     { k: 'name', t: 'Area', f: v => `<span class="area-link">${esc(v)}</span>` },
     { k: 'sales', t: 'Sales', num: true, f: v => fmt(v) },
-    { k: 'sales_chg', t: 'Change', num: true, f: v => chg(v) },
     { k: 'value', t: 'Value', num: true, f: v => aed(v, true) },
     { k: 'offplan_share', t: 'Off-plan', num: true, f: v => v === null ? '–' : fmt(v, 0) + '%' },
+    { k: 'mortgages', t: 'Mortgages', num: true, f: v => fmt(v) },
     { k: 'ppsqm_flat', t: 'Flats AED/m²', num: true, f: (v, r) => r.n_flat >= 10 ? fmt(v) : '–' },
-    { k: 'ppsqm_flat_chg', t: 'Change', num: true, f: v => chg(v) },
     { k: 'ppsqm_villa', t: 'Villas AED/m²', num: true, f: (v, r) => r.n_villa >= 10 ? fmt(v) : '–' }];
   const draw = q => sortable('s-areas', RE.areas.filter(a => !q || a.name.toLowerCase().includes(q)), cols, n => go('areas', n), 'sales');
   draw('');
@@ -358,7 +359,7 @@ function viewRents() {
 function viewAreas() {
   if (!RE) { head('areas', 'Compare areas', ''); return body('areas', loadingNote()); }
   if (currentArea) return areaProfile(currentArea);
-  head('areas', 'Compare areas', `Every area with property sales or rental contracts, ${span(RE.last12.from, RE.last12.to)}. Areas are as the Dubai Land Department names them.`);
+  head('areas', 'Compare areas', `Every area with property sales or rental contracts, ${AS()}. Areas are as the Dubai Land Department names them.`);
   const rent = Object.fromEntries((RE.rent.areas || []).map(a => [a.name, a]));
   const rows = RE.areas.map(a => ({ ...a, contracts: rent[a.name] ? rent[a.name].contracts : null, rent_flat: rent[a.name] ? rent[a.name].flat : null }));
   const names = RE.areas.map(a => a.name).sort();
@@ -373,7 +374,7 @@ function viewAreas() {
   const cols = [
     { k: 'name', t: 'Area', f: v => `<span class="area-link">${esc(v)}</span>` },
     { k: 'sales', t: 'Sales', num: true, f: v => fmt(v) },
-    { k: 'sales_chg', t: 'Change', num: true, f: v => chg(v) },
+    { k: 'value', t: 'Value', num: true, f: v => aed(v, true) },
     { k: 'ppsqm_flat', t: 'Flats AED/m²', num: true, f: (v, r) => r.n_flat >= 10 ? fmt(v) : '–' },
     { k: 'ppsqm_villa', t: 'Villas AED/m²', num: true, f: (v, r) => r.n_villa >= 10 ? fmt(v) : '–' },
     { k: 'contracts', t: 'Rental contracts', num: true, f: v => v ? fmt(v) : '–' },
@@ -393,8 +394,8 @@ function compareAreas(a, b) {
   const A = areaRow(a), B = areaRow(b), RA = rentRow(a), RB = rentRow(b);
   const line = (label, fa, fb) => `<tr><th scope="row">${label}</th><td class="num">${fa}</td><td class="num">${fb}</td></tr>`;
   out.innerHTML = `<div class="table-wrap" style="max-height:none;margin-top:12px"><table class="data cmp"><thead><tr><th></th><th class="num">${esc(a)}</th><th class="num">${esc(b)}</th></tr></thead><tbody>
-    ${line('Sales, last 12 months', fmt(A && A.sales), fmt(B && B.sales))}
-    ${line('Change on the year before', chg(A && A.sales_chg) || '–', chg(B && B.sales_chg) || '–')}
+    ${line('Sales, ' + AS(), fmt(A && A.sales), fmt(B && B.sales))}
+    ${line('Mortgages registered', fmt(A && A.mortgages), fmt(B && B.mortgages))}
     ${line('Value of sales', aed(A && A.value), aed(B && B.value))}
     ${line('Sold off-plan', A && A.offplan_share !== null ? fmt(A.offplan_share, 0) + '%' : '–', B && B.offplan_share !== null ? fmt(B.offplan_share, 0) + '%' : '–')}
     ${line('Flats, AED per m²', A && A.n_flat >= 10 ? fmt(A.ppsqm_flat) : '–', B && B.n_flat >= 10 ? fmt(B.ppsqm_flat) : '–')}
@@ -403,7 +404,7 @@ function compareAreas(a, b) {
     ${line('Flat rent, AED a year', RA && RA.flat ? fmt(RA.flat) : '–', RB && RB.flat ? fmt(RB.flat) : '–')}
     ${line('Villa rent, AED a year', RA && RA.n_villa >= 10 ? fmt(RA.villa) : '–', RB && RB.n_villa >= 10 ? fmt(RB.villa) : '–')}
   </tbody></table></div>${canvas('cmp-chart', 240)}`;
-  const p = palette(), months = RE.monthly.filter(r => !r.partial).slice(-24).map(r => r.m);
+  const p = palette(), months = RE.monthly.filter(r => !r.partial && r.src === 'dld').map(r => r.m);
   const ser = (X, i) => months.map(m => { const s = X && X.series.find(x => x[0] === m); return s ? s[i] : null; });
   chart('cmp-chart', { type: 'line', data: { labels: months.map(ml), datasets: [
     { label: a + ', flats AED/m²', data: ser(A, 2), borderColor: p.a, backgroundColor: p.a, pointRadius: 0, borderWidth: 2, spanGaps: true },
@@ -412,21 +413,21 @@ function compareAreas(a, b) {
 }
 function areaProfile(n) {
   const A = areaRow(n), R = rentRow(n);
-  head('areas', n, `<a href="#areas">All areas</a> · Area profile, ${span(RE.last12.from, RE.last12.to)} against the 12 months before`);
-  if (!A && !R) return body('areas', `<p class="empty-note">No sales or rental contracts recorded for this area in the last two years.</p>`);
+  head('areas', n, `<a href="#areas">All areas</a> · Area profile, ${AS()}`);
+  if (!A && !R) return body('areas', `<p class="empty-note">No sales or rental contracts recorded for this area this year.</p>`);
   const S = A ? A.series : [];
   const partialSet = new Set(RE.monthly.filter(r => r.partial).map(r => r.m));
   body('areas', `
     <div class="kpis">
-      ${A ? kpi('Sales, last 12 months', fmt(A.sales), `The 12 months before: ${fmt(A.sales_prev)}`, chg(A.sales_chg)) : ''}
+      ${A ? kpi('Sales, ' + AS(), fmt(A.sales), `${fmt(A.mortgages)} mortgages and ${fmt(A.gifts)} gifts registered over the same months`) : ''}
       ${A ? kpi('Value of those sales', aed(A.value), `${A.offplan_share !== null ? fmt(A.offplan_share, 0) + '% sold off-plan' : ''}`) : ''}
-      ${A && A.n_flat >= 10 ? kpi('Flats, typical AED per m²', fmt(A.ppsqm_flat), `From ${fmt(A.n_flat)} flat sales`, chg(A.ppsqm_flat_chg)) : A && A.n_villa >= 10 ? kpi('Villas, typical AED per m²', fmt(A.ppsqm_villa), `From ${fmt(A.n_villa)} villa sales`, chg(A.ppsqm_villa_chg)) : ''}
-      ${R ? kpi('Rental contracts, last 12 months', fmt(R.contracts), R.flat ? `Typical flat rent AED ${fmt(R.flat)} a year` : '') : ''}
+      ${A && A.n_flat >= 10 ? kpi('Flats, typical AED per m²', fmt(A.ppsqm_flat), `From ${fmt(A.n_flat)} flat sales`) : A && A.n_villa >= 10 ? kpi('Villas, typical AED per m²', fmt(A.ppsqm_villa), `From ${fmt(A.n_villa)} villa sales`) : ''}
+      ${R ? kpi('Rental contracts, ' + (R.span || AS()), fmt(R.contracts), R.flat ? `Typical flat rent AED ${fmt(R.flat)} a year` : '') : ''}
     </div>
     <div class="grid" style="margin-top:var(--gap)">
       ${A ? `<div class="col-8">${card('Sales and price every month', `Number of sales (bars) and the median flat price per m² (line). ${partialNote()}`, canvas('ap-sales', 280))}</div>` : ''}
       ${R && Object.keys(R.rooms).length ? `<div class="col-4">${card('Flat rents by size', 'Typical annual rent, AED', canvas('ap-rooms', 280))}</div>` : ''}
-      ${A ? `<div class="col-12">${card('Where this area stands', 'Its rank among all areas of Dubai over the last 12 months', `<div class="stats rank-stats" id="ap-rank"></div>`)}</div>` : ''}
+      ${A ? `<div class="col-12">${card('Where this area stands', 'Its rank among all areas of Dubai, ' + AS(), `<div class="stats rank-stats" id="ap-rank"></div>`)}</div>` : ''}
     </div>
     <p class="foot-src">Source: ${DLD_SRC()}. <a href="#methods">How it's counted</a></p>`);
   const p = palette();
@@ -436,7 +437,7 @@ function areaProfile(n) {
       { type: 'line', label: 'Flats AED/m²', data: S.map(s => partialSet.has(s[0]) ? null : s[2]), borderColor: p.b, backgroundColor: p.b, pointRadius: 0, borderWidth: 2, yAxisID: 'y1', spanGaps: true, order: 1 }] },
       options: { scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, maxTicksLimit: 10 } }, y: { beginAtZero: true }, y1: { position: 'right', grid: { display: false }, ticks: { callback: v => fmt(v) } } } } });
     const rank = (k, desc = true) => { const xs = RE.areas.filter(r => r[k] !== null && (k !== 'ppsqm_flat' || r.n_flat >= 10)).sort((a, b) => desc ? b[k] - a[k] : a[k] - b[k]); const i = xs.findIndex(r => r.name === n); return i < 0 ? '–' : `${i + 1} of ${xs.length}`; };
-    $('#ap-rank').innerHTML = [['Most sales', rank('sales')], ['Highest value', rank('value')], ['Highest flat price per m²', A.n_flat >= 10 ? rank('ppsqm_flat') : '–'], ['Fastest growth in sales', A.sales_prev >= 20 ? rank('sales_chg') : '–']]
+    $('#ap-rank').innerHTML = [['Most sales', rank('sales')], ['Highest value of sales', rank('value')], ['Highest flat price per m²', A.n_flat >= 10 ? rank('ppsqm_flat') : '–'], ['Most sold off-plan', A.sales >= 20 ? rank('offplan_share') : '–']]
       .map(([t, v]) => `<div class="stat"><dt>${t}</dt><dd>${v}</dd></div>`).join('');
   }
   if (R && Object.keys(R.rooms).length) {
@@ -499,7 +500,9 @@ function viewMethods() {
       <li><b>Price per square metre</b> is each sale's value divided by its registered area. Sales of under 15 m² are left out, and so are prices below AED 500 or above AED 400,000 per m². These are almost always whole buildings or plots registered as one unit, or entry errors. The monthly figure is the <b>median</b>: half of that month's sales were cheaper per m², half dearer.</li>
       <li><b>Twelve-month figures</b> cover the last 12 complete months. The typical price per m² over 12 months is the average of the 12 monthly medians, each weighted by its number of sales. Area prices are shown only where an area had at least 10 sales of that type.</li>
       <li><b>The current month</b> is still being registered, and the Land Department keeps adding its off-plan registrations for several weeks after the month ends. It is shown faded in the charts and is never used in 12-month totals. The last three months are pulled again every day so late registrations are picked up.</li>
-      <li><b>Areas</b> are the Land Department's own area names.</li>
+      <li><b>Areas</b> are the Land Department's own area names. Some are land names that differ from the community names people use: Madinat Al Mataar, for example, is in Dubai South.</li>
+      <li><b>Years before 2026.</b> The Land Department's open-data service holds the current year only. Earlier months come from a public copy of the Land Department's registered sales, published by Dubai Real Estate Data under a CC BY 4.0 licence. They are used for Dubai-wide figures only, because that copy names some areas differently. They were checked against the months taken directly from the Land Department for 2026, and every complete month's total agreed within 5%. Mortgages and gifts are shown from 2026 only.</li>
+      <li><b>Area figures</b> cover the complete months of the current year, all taken directly from the Land Department.</li>
     </ul>
     <h2>Rents</h2>
     <p>Every rental contract registered in Ejari, read from the same Land Department service. A contract is counted in the month it was registered.</p>
@@ -519,8 +522,9 @@ function viewSources() {
   const rows = OFF ? OFF.figures.map(f => `<tr><td data-l="Figure">${esc(f.label)}</td><td data-l="Period">${esc(f.period)}</td><td data-l="Produced by">${esc(f.by)}</td><td data-l="Published"><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.source)}</a></td></tr>`).join('') : '';
   body('sources', `
     ${card('Refreshed every day', '', `<div class="table-wrap" style="max-height:none"><table class="data"><thead><tr><th>Data</th><th>Covers</th><th>Last refreshed</th><th>Source</th></tr></thead><tbody>
-      ${RE ? `<tr><td>Property sales, mortgages and gifts</td><td>${ml(RE.first_month)} to today</td><td>${new Date(RE.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Dubai' })} Dubai time</td><td>${DLD_SRC()}</td></tr>` : ''}
+      ${RE ? `<tr><td>Property sales, mortgages and gifts</td><td>${ml(RE.api_first)} to today</td><td>${new Date(RE.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Dubai' })} Dubai time</td><td>${DLD_SRC()}</td></tr>` : ''}
       ${RE && RE.rent.first_month ? `<tr><td>Rental contracts (Ejari)</td><td>${ml(RE.rent.first_month)} to today</td><td>Same refresh</td><td>${DLD_SRC()}</td></tr>` : ''}
+      ${RE && RE.copy_source ? `<tr><td>Property sales before ${mlong(RE.api_first)}, Dubai-wide</td><td>${ml(RE.first_month)} to ${ml((RE.monthly.filter(r => r.src === 'copy').slice(-1)[0] || {}).m)}</td><td>Fixed history</td><td><a href="${esc(RE.copy_source.url)}" target="_blank" rel="noopener">Dubai Real Estate Data</a>, a public copy of Land Department records (CC BY 4.0)</td></tr>` : ''}
     </tbody></table></div>`)}
     <div style="margin-top:var(--gap)">${card('Official figures as published', OFF ? `Checked ${esc(OFF.checked)}` : '', `<div class="table-wrap" style="max-height:none"><table class="data wrap"><thead><tr><th>Figure</th><th>Period</th><th>Produced by</th><th>Published</th></tr></thead><tbody>${rows}</tbody></table></div>`)}</div>`);
 }

@@ -35,19 +35,23 @@ def complete_months(months, today_ym):
     return [m for m in months if m < today_ym]
 
 
-def build_realestate(tx, rent, today_ym):
-    months = sorted(tx)
+def build_realestate(tx, rent, today_ym, hist=None):
+    api_months = sorted(tx)
+    hist = {m: v for m, v in (hist or {}).items() if not api_months or m < api_months[0]}
+    city = dict(hist); city.update(tx)              # Dubai-wide series: the published copy before the API's first month
+    months = sorted(city)
     full = complete_months(months, today_ym)
     monthly = []
     for m in months:
-        d = tx[m]
+        d = city[m]
         g = d['groups']
+        api = m in tx
         monthly.append({
-            'm': m, 'partial': m >= today_ym,
+            'm': m, 'partial': m >= today_ym, 'src': 'dld' if api else 'copy',
             'sales': d['sales']['count'], 'value': d['sales']['value'],
             'offplan': d['sales']['offplan'], 'ready': d['sales']['ready'], 'offplan_value': d['sales'].get('offplan_value'),
-            'mortgages': g.get('Mortgage', {}).get('count', 0), 'mortgage_value': g.get('Mortgage', {}).get('value', 0),
-            'gifts': g.get('Gifts', {}).get('count', 0), 'gift_value': g.get('Gifts', {}).get('value', 0),
+            'mortgages': g.get('Mortgage', {}).get('count', 0) if api else None, 'mortgage_value': g.get('Mortgage', {}).get('value', 0) if api else None,
+            'gifts': g.get('Gifts', {}).get('count', 0) if api else None, 'gift_value': g.get('Gifts', {}).get('value', 0) if api else None,
             'ppsqm_flat': d['ppsqm_flat']['median'], 'ppsqm_villa': d['ppsqm_villa']['median'],
             'n_flat': d['ppsqm_flat']['n'], 'n_villa': d['ppsqm_villa']['n'],
             'price_median': d['sale_price']['median'],
@@ -60,22 +64,26 @@ def build_realestate(tx, rent, today_ym):
             return None
         rows = [r for r in monthly if r['m'] in ms]
         s = sum(r['sales'] for r in rows)
+        mg = [r for r in rows if r['mortgages'] is not None]
         return {'from': ms[0], 'to': ms[-1], 'sales': s, 'value': sum(r['value'] for r in rows),
                 'offplan_share': round(sum(r['offplan'] for r in rows) / s * 100, 1) if s else None,
-                'mortgages': sum(r['mortgages'] for r in rows), 'gifts': sum(r['gifts'] for r in rows),
+                'mortgages': sum(r['mortgages'] for r in mg) if len(mg) == len(rows) else None,
+                'gifts': sum(r['gifts'] for r in mg) if len(mg) == len(rows) else None,
                 'ppsqm_flat': wavg([(r['ppsqm_flat'], r['n_flat']) for r in rows]),
                 'ppsqm_villa': wavg([(r['ppsqm_villa'], r['n_villa']) for r in rows])}
 
-    # by area: 12-month totals, the year before, and a monthly series for the area profile
-    series_months = full[-36:] + [m for m in months if m >= today_ym]
+    # by area: the DLD service's complete months (it serves the current year only), and a monthly series per area
+    api_full = complete_months(api_months, today_ym)
+    area_cur = api_full[-12:]
+    series_months = api_months
     areas = defaultdict(lambda: {'series': {}})
-    for m in months:
+    for m in api_months:
         for a, v in tx[m]['areas'].items():
             areas[a]['series'][m] = v
     area_rows = []
     for a, A in areas.items():
-        cur = [A['series'][m] for m in last12 if m in A['series']]
-        pre = [A['series'][m] for m in prev12 if m in A['series']]
+        cur = [A['series'][m] for m in area_cur if m in A['series']]
+        pre = []
         s_cur = sum(x['sales'] for x in cur)
         s_pre = sum(x['sales'] for x in pre)
         if s_cur + s_pre == 0 and not any(x.get('mortgages') for x in cur):
@@ -101,14 +109,15 @@ def build_realestate(tx, rent, today_ym):
     by_type, bands, rooms = defaultdict(lambda: {'count': 0, 'value': 0}), defaultdict(int), defaultdict(int)
     projects = defaultdict(lambda: {'sales': 0, 'value': 0, 'area': ''})
     for m in last12:
-        d = tx[m]
+        d = city[m]
         for k, v in d['by_type'].items():
             by_type[k]['count'] += v['count']; by_type[k]['value'] += v['value']
         for k, v in d['price_bands'].items():
             bands[k] += v
         for k, v in d['flat_rooms'].items():
             rooms[k] += v
-        for p in d['top_projects']:
+    for m in area_cur:                              # projects come from the DLD service's own months
+        for p in tx[m].get('top_projects', []):
             P = projects[p['name']]
             P['sales'] += p['sales']; P['value'] += p['value']; P['area'] = p['area']
     band_order = ['under 1M', '1M to 2M', '2M to 5M', '5M to 10M', '10M and over']
@@ -150,6 +159,9 @@ def build_realestate(tx, rent, today_ym):
         'updated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'source': {'name': 'Dubai Land Department open data', 'url': 'https://dubailand.gov.ae/en/open-data/real-estate-data/'},
         'first_month': months[0] if months else None, 'last_complete': full[-1] if full else None,
+        'api_first': api_months[0] if api_months else None,
+        'area_span': {'from': area_cur[0], 'to': area_cur[-1]} if area_cur else None,
+        'copy_source': next((v['source'] for v in hist.values()), None),
         'monthly': monthly, 'last12': span(last12), 'prev12': span(prev12),
         'areas': area_rows,
         'by_type': sorted(({'type': k, **v} for k, v in by_type.items()), key=lambda r: -r['count']),
@@ -173,11 +185,11 @@ def build_realestate(tx, rent, today_ym):
 def main():
     os.makedirs(OUT, exist_ok=True)
     today_ym = time.strftime('%Y-%m', time.gmtime(time.time() + 4 * 3600))   # Dubai time
-    tx, rent = load_months('tx'), load_months('rent')
+    tx, rent, hist = load_months('tx'), load_months('rent'), load_months('hist')
     if tx:
-        re_ = build_realestate(tx, rent, today_ym)
+        re_ = build_realestate(tx, rent, today_ym, hist)
         json.dump(re_, open(os.path.join(OUT, 'realestate.json'), 'w'), separators=(',', ':'), ensure_ascii=False)
-        print('realestate.json', len(re_['monthly']), 'months of sales,', len(re_['rent']['monthly']), 'of rents,', len(re_['areas']), 'areas')
+        print('realestate.json', len(re_['monthly']), 'months of sales (', len(hist), 'from the published copy ),', len(re_['rent']['monthly']), 'of rents,', len(re_['areas']), 'areas')
     off = os.path.join(DATA, 'official.json')
     if os.path.exists(off):
         o = json.load(open(off))

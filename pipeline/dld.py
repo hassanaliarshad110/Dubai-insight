@@ -250,8 +250,8 @@ def run(kind, months, fn, deadline):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--since', default='2019-01')
-    ap.add_argument('--rent-since', default='2023-01')
+    ap.add_argument('--since', default='2026-01')   # the DLD service holds the current year only; earlier months stay as saved
+    ap.add_argument('--rent-since', default='2026-01')
     ap.add_argument('--budget-min', type=float, default=120)
     ap.add_argument('--only', choices=['tx', 'rent'])
     ap.add_argument('--until', help='last month to pull (YYYY-MM); default this month')
