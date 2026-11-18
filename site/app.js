@@ -188,7 +188,7 @@ function viewDashboard() {
     kpi('Typical price per square metre, flats', 'AED ' + fmt(L.ppsqm_flat), `Over the same 12 months; villas AED ${fmt(L.ppsqm_villa)}`, chg(pctOf(L.ppsqm_flat, P && P.ppsqm_flat))),
     kpi('Sold off-plan', fmt(L.offplan_share, 1) + '%', `Share of sales registered before the building was finished${P ? '; the 12 months before: ' + fmt(P.offplan_share, 1) + '%' : ''}`, P ? pts(L.offplan_share - P.offplan_share) : ''),
     R ? kpi(`Rental contracts, ${span(R.from, R.to)}`, fmt(R.contracts), `${fmt(R.new / R.contracts * 100, 0)}% new contracts, the rest renewals; typical flat rent AED ${fmt(R.flat)} a year`)
-      : kpi('Mortgages registered', fmt(L.mortgages), `Over the same 12 months, and ${fmt(L.gifts)} properties given as gifts`),
+      : (() => { const Y = RE.monthly.filter(r => r.src === 'dld' && !r.partial); return kpi(`Mortgages registered, ${AS()}`, fmt(Y.reduce((t, r) => t + r.mortgages, 0)), `And ${fmt(Y.reduce((t, r) => t + r.gifts, 0))} properties given as gifts over the same months`); })(),
   ].join('') : '';
   const k2 = [
     pop && kpi('Residents at the end of 2025', big(pop.value), `${esc(pop.detail)}. <span class="src">${srcLine(pop)}</span>`),
