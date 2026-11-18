@@ -1,99 +1,122 @@
 {
+ "v": 2,
  "id": "law8_2007",
  "title": "Law No. (8) of 2007 Concerning Escrow Accounts for Real Estate Development in the Emirate of Dubai",
  "url": "https://dlp.dubai.gov.ae/Legislation%20Reference/2007/Law%20No.%20%288%29%20of%202007.html",
  "fetched": "2026-11-18",
- "sha256": "2f2fc5dea6ee5a663755fecce35ca9914fb6483eea40cb6911554febe05cf774",
- "preamble": "Law No. (8) of 2007\n\nConcerning\n\nEscrow Accounts for Real Estate\n\nDevelopment in the Emirate of Dubai[1]\n\nــــــــــــــــــــــــــــــــــــــــــــــ\n\nWe, Mohammed bin Rashid Al Maktoum, Ruler of Dubai,\n\nAfter perusal of:\n\nFederal Law No. (5) of 1985 Issuing the Civil Code and its amendments;\n\nLaw No. (7) of 2006 Concerning Real Property Registration in the Emirate\nof Dubai; and\n\nRegulation No. (3) of 2006 Determining Areas for Ownership by Non-UAE Nationals\nof Real Property in the Emirate of Dubai,\n\nDo hereby issue this\nLaw.\n\nChapter\nOne\n\nDefinitions\nand General Provisions",
+ "sha256": "133315c1d48ce6e6bddf74550eb3f00fec9cc3517bfab602a86e3f6a2a4e43b3",
+ "preamble": "Law No. (8) of 2007\nConcerning\nEscrow Accounts for Real Estate\nDevelopment in the Emirate of Dubai[1]\nــــــــــــــــــــــــــــــــــــــــــــــ\nWe, Mohammed bin Rashid Al Maktoum, Ruler of Dubai,\nAfter perusal of:\nFederal Law No. (5) of 1985 Issuing the Civil Code and its amendments;\nLaw No. (7) of 2006 Concerning Real Property Registration in the Emirate of Dubai; and\nRegulation No. (3) of 2006 Determining Areas for Ownership by Non-UAE Nationals of Real Property in the Emirate of Dubai,\nDo hereby issue this Law.\nChapter One",
  "articles": [
   {
    "no": 1,
-   "text": "This Law will be cited as \"Law No. (8) of 2007 Concerning Escrow\nAccounts for Real Estate Development in the Emirate of Dubai\".\n\nDefinitions"
+   "heading": "Definitions and General Provisions",
+   "text": "This Law will be cited as \"Law No. (8) of 2007 Concerning Escrow Accounts for Real Estate Development in the Emirate of Dubai\"."
   },
   {
    "no": 2,
-   "text": "The following words and expressions will have the\nmeaning indicated opposite each of them unless the context implies otherwise:\n\nEmirate:\n\nThe Emirate of Dubai.\n\nDepartment:\n\nThe Land Department.\n\nChairman:\n\nThe chairman of the\nDepartment.\n\nDirector General:\n\nThe director general of the\nDepartment.\n\nRegister:\n\nThe register maintained by the\nDepartment for registering Developers.\n\nEscrow Account:\n\nThe bank account of a real estate\ndevelopment project in which the payments made by purchasers of Units sold\noff-plan or by the financers of the project are deposited.\n\nDeveloper:\n\nAny natural or legal person\nlicensed to engage in the purchase and sale of Real Property for Real Estate Development\npurposes, and this includes the master developer and the sub-developer.\n\nEscrow Agent:\n\nThe financial or banking\ninstitution accredited by the Department to manage an Escrow Account.\n\nCompetent Entities:\n\nGovernment entities authorised\nto license Developers.\n\nReal Estate Development:\n\nProjects for the\nconstruction of residential or commercial multiple storey buildings or\ncompounds.\n\nReal Property:\n\nAnything which is fixed and\ncannot be moved without damage or alteration of its structure.\n\nUnit:\n\nAny designated part of the\nReal Property that the Developer sells to third parties."
+   "heading": "Definitions",
+   "text": "The following words and expressions will have the meaning indicated opposite each of them unless the context implies otherwise:\nEmirate:\nThe Emirate of Dubai.\n\nDepartment:\nThe Land Department.\n\nChairman:\nThe chairman of the Department.\n\nDirector General:\nThe director general of the Department.\n\nRegister:\nThe register maintained by the Department for registering Developers.\n\nEscrow Account:\nThe bank account of a real estate development project in which the payments made by purchasers of Units sold off-plan or by the financers of the project are deposited.\n\nDeveloper:\nAny natural or legal person licensed to engage in the purchase and sale of Real Property for Real Estate Development purposes, and this includes the master developer and the sub-developer.\n\nEscrow Agent:\nThe financial or banking institution accredited by the Department to manage an Escrow Account.\n\nCompetent Entities:\nGovernment entities authorised to license Developers.\n\nReal Estate Development:\nProjects for the construction of residential or commercial multiple storey buildings or compounds.\n\nReal Property:\nAnything which is fixed and cannot be moved without damage or alteration of its structure.\n\nUnit:\nAny designated part of the Real Property that the Developer sells to third parties."
   },
   {
    "no": 3,
-   "text": "This Law will apply to Developers who sell Units off-plan in\nReal Estate Development projects in the Emirate and who receive payments from\npurchasers or financers towards such Units."
+   "heading": "",
+   "text": "This Law will apply to Developers who sell Units off-plan in Real Estate Development projects in the Emirate and who receive payments from purchasers or financers towards such Units."
   },
   {
    "no": 4,
-   "text": "The Department will\nmaintain a register known as\nthe �Register of Real Estate Developers� in which are entered the names of\nDevelopers licensed to engage in the Real Estate Development business in the\nEmirate. No Developer may engage in such business unless he is recorded in that\nregister and licensed by the Competent Entities in accordance with their relevant\nrequirements."
+   "heading": "",
+   "text": "The Department will maintain a register known as the “Register of Real Estate Developers” in which are entered the names of Developers licensed to engage in the Real Estate Development business in the Emirate. No Developer may engage in such business unless he is recorded in that register and licensed by the Competent Entities in accordance with their relevant requirements."
   },
   {
    "no": 5,
-   "text": "A Developer may not advertise in local or\ninternational media, and may not participate in local or international\nexhibitions to promote the sale of Units or Real Property off-plan, unless he\nobtains an authorisation in writing from the Department. The Director General will issue the resolutions required\nfor the regulation of advertisements in the media, and of participation in\nexhibitions.\n\nChapter\nTwo\n\nOpening\nan Escrow Account"
+   "heading": "",
+   "text": "A Developer may not advertise in local or international media, and may not participate in local or international exhibitions to promote the sale of Units or Real Property off-plan, unless he obtains an authorisation in writing from the Department. The Director General will issue the resolutions required for the regulation of advertisements in the media, and of participation in exhibitions.\nChapter Two"
   },
   {
    "no": 6,
-   "text": "Any\nDeveloper who wishes to sell Units off-plan must submit to the Department a\nrequest to open an Escrow Account. This request must comprise:\n\n1. a certificate of membership in the Dubai Chamber\nof Commerce and Industry;\n\n2. a trade licence;\n\n3. a title deed of the land to be developed;\n\n4. copy of the contract concluded between the\nmaster developer and the sub-developer;\n\n5. initial architectural designs and engineering\nplans approved by the Competent Entities and the master developer;\n\n6. a financial statement of the estimated cost and\nrevenues of the project certified by an accredited chartered auditor;\n\n7. an undertaking by the sub-developer to start the\nconstruction works of the project upon obtaining the approval of the master\ndeveloper for off-plan sale, or an undertaking by the master developer if there\nis no sub-developer; and\n\n8. a standard sale contract between the Developer\nand the purchaser."
+   "heading": "Opening an Escrow Account",
+   "text": "Any Developer who wishes to sell Units off-plan must submit to the Department a request to open an Escrow Account. This request must comprise:\n1. a certificate of membership in the Dubai Chamber of Commerce and Industry;\n2. a trade licence;\n3. a title deed of the land to be developed;\n4. copy of the contract concluded between the master developer and the sub-developer;\n5. initial architectural designs and engineering plans approved by the Competent Entities and the master developer;\n6. a financial statement of the estimated cost and revenues of the project certified by an accredited chartered auditor;\n7. an undertaking by the sub-developer to start the construction works of the project upon obtaining the approval of the master developer for off-plan sale, or an undertaking by the master developer if there is no sub-developer; and\n8. a standard sale contract between the Developer and the purchaser."
   },
   {
    "no": 7,
-   "text": "An Escrow Account will be opened pursuant to a written\nagreement between the Developer and the Escrow Agent whereby the payments made\nby off-plan purchasers, or by the financers of the project are deposited in an\naccount opened with the Escrow Agent in the name of the Real Estate Development\nproject.\n\nThis agreement will determine the terms of managing the account and\nthe rights and obligations of the parties to the agreement. A copy of this\nagreement will be\nsubmitted to the Department."
+   "heading": "",
+   "text": "An Escrow Account will be opened pursuant to a written agreement between the Developer and the Escrow Agent whereby the payments made by off-plan purchasers, or by the financers of the project are deposited in an account opened with the Escrow Agent in the name of the Real Estate Development project.\nThis agreement will determine the terms of managing the account and the rights and obligations of the parties to the agreement. A copy of this agreement will be submitted to the Department."
   },
   {
    "no": 8,
-   "text": "The Department may update the registry entry of the plot\nowned by the master developer to indicate that a purchase agreement has been concluded\nbetween the master developer and the sub-developer in respect of this plot, or any\npart thereof. A purchaser of an off-plan Unit may request that the Department update\nthe registry entry of the plot on which the project will be constructed to\nindicate that a purchase agreement has been concluded between the purchaser and\nthe sub-developer.\n\nChapter\nThree\n\nManagement\nof an Escrow Account"
+   "heading": "",
+   "text": "The Department may update the registry entry of the plot owned by the master developer to indicate that a purchase agreement has been concluded between the master developer and the sub-developer in respect of this plot, or any part thereof. A purchaser of an off-plan Unit may request that the Department update the registry entry of the plot on which the project will be constructed to indicate that a purchase agreement has been concluded between the purchaser and the sub-developer.\nChapter Three"
   },
   {
    "no": 9,
-   "text": "1. An Escrow Account will\nbe opened in the name of the\nproject, and will be\ndedicated exclusively to the construction of that Real Estate Development project.\nNo attachment may be imposed on the payments deposited in this account for the\nbenefit of the creditors of the Developer.\n\n2. In the event of multiple projects implemented by\nthe Developer, each project must have a separate Escrow Account."
+   "heading": "Management of an Escrow Account",
+   "text": "1. An Escrow Account will be opened in the name of the project, and will be dedicated exclusively to the construction of that Real Estate Development project. No attachment may be imposed on the payments deposited in this account for the benefit of the creditors of the Developer.\n2. In the event of multiple projects implemented by the Developer, each project must have a separate Escrow Account."
   },
   {
    "no": 10,
-   "text": "1. The Department will\nmaintain a special register known\nas the �Register of Escrow Agents� in which are entered the names of Escrow\nAgents.\n\n2. An Escrow Agent must be qualified to manage\nEscrow Accounts."
+   "heading": "",
+   "text": "1. The Department will maintain a special register known as the “Register of Escrow Agents” in which are entered the names of Escrow Agents.\n2. An Escrow Agent must be qualified to manage Escrow Accounts."
   },
   {
    "no": 11,
-   "text": "1. An Escrow Agent must provide the Department with\nregular statements of the revenue and expenditure of his Escrow Accounts. The\nDepartment may, at any time, request any Escrow Agent to provide any\ninformation or data it requires, and in all events, the Department may seek\nassistance from any person it deems appropriate to audit such statements and\ndata.\n\n2. If it is proven to the Department that an Escrow\nAgent has committed any violation of this Law or of its implementing bylaws,\nthe Department must notify him in writing and specify a time limit for him to\nremedy such violation."
+   "heading": "",
+   "text": "1. An Escrow Agent must provide the Department with regular statements of the revenue and expenditure of his Escrow Accounts. The Department may, at any time, request any Escrow Agent to provide any information or data it requires, and in all events, the Department may seek assistance from any person it deems appropriate to audit such statements and data.\n2. If it is proven to the Department that an Escrow Agent has committed any violation of this Law or of its implementing bylaws, the Department must notify him in writing and specify a time limit for him to remedy such violation."
   },
   {
    "no": 12,
-   "text": "Depositors or their representatives may gain access to\ntheir own accounting records, and may request copies of such records.\nRepresentatives from official authorities may have access to, and obtain copies\nof, such records."
+   "heading": "",
+   "text": "Depositors or their representatives may gain access to their own accounting records, and may request copies of such records. Representatives from official authorities may have access to, and obtain copies of, such records."
   },
   {
    "no": 13,
-   "text": "If a Developer mortgages a project in order to\nobtain a loan from finance institutions or companies, these institutions or\ncompanies must deposit the loan amount in the relevant Escrow Account so that\nit is managed in accordance with the provisions of this Law."
+   "heading": "",
+   "text": "If a Developer mortgages a project in order to obtain a loan from finance institutions or companies, these institutions or companies must deposit the loan amount in the relevant Escrow Account so that it is managed in accordance with the provisions of this Law."
   },
   {
    "no": 14,
-   "text": "An Escrow Agent must retain five percent (5%) of\nthe total value of each Escrow Account once the Developer obtains the\ncompletion certificate. The retained amount will\nbe released to the Developer\none (1) year from the registration of Units in the name of purchasers."
+   "heading": "",
+   "text": "An Escrow Agent must retain five percent (5%) of the total value of each Escrow Account once the Developer obtains the completion certificate. The retained amount will be released to the Developer one (1) year from the registration of Units in the name of purchasers."
   },
   {
    "no": 15,
-   "text": "In the event of any emergency situation where the\nReal Estate Development project is not completed, the Escrow Agent of that\nproject must, after consultation with the Department, take the required\nmeasures to preserve the rights of depositors, and ensure that the Real Estate\nDevelopment project is completed, or depositors are refunded their payments.\n\nChapter\nFour\n\nPenalties"
+   "heading": "",
+   "text": "In the event of any emergency situation where the Real Estate Development project is not completed, the Escrow Agent of that project must, after consultation with the Department, take the required measures to preserve the rights of depositors, and ensure that the Real Estate Development project is completed, or depositors are refunded their payments.\nChapter Four"
   },
   {
    "no": 16,
-   "text": "Without prejudice to any penalties stipulated by\nany other legislation, a jail sentence and a fine of at least one hundred\nthousand Dirhams (AED 100,000.00), or either penalty, will\nbe imposed on any person who:\n\n1. engages in Real Estate Development activity in\nthe Emirate without a licence;\n\n2. provides the Competent Entities with incorrect\ndocumentation or information in order to obtain a licence to conducts the Real\nEstate Development activity;\n\n3. knowingly offers for sale Units in fraudulent Real\nEstate Development projects;\n\n4. steals, appropriates, or forfeits any amounts of\nmoney delivered to him for the purpose of implementing Real Estate Development projects;\n\n5. in the case of an auditor, deliberately prepares\na fraudulent report upon auditing the financial position of the Developer, or\ndeliberately fails to disclose essential facts in his report;\n\n6. in the case of a consultant, knowingly certifies\nfraudulent reports on a Real Estate Development project; or\n\n7. in the case of a Developer, deals with a real\nestate broker who is not registered on the Real Estate Brokers Register maintained\nby the Department in accordance with Bylaw No. (85) of 2006 Concerning the Real\nEstate Brokers Register in the Emirate of Dubai."
+   "heading": "Penalties",
+   "text": "Without prejudice to any penalties stipulated by any other legislation, a jail sentence and a fine of at least one hundred thousand Dirhams (AED 100,000.00), or either penalty, will be imposed on any person who:\n1. engages in Real Estate Development activity in the Emirate without a licence;\n2. provides the Competent Entities with incorrect documentation or information in order to obtain a licence to conducts the Real Estate Development activity;\n3. knowingly offers for sale Units in fraudulent Real Estate Development projects;\n4. steals, appropriates, or forfeits any amounts of money delivered to him for the purpose of implementing Real Estate Development projects;\n5. in the case of an auditor, deliberately prepares a fraudulent report upon auditing the financial position of the Developer, or deliberately fails to disclose essential facts in his report;\n6. in the case of a consultant, knowingly certifies fraudulent reports on a Real Estate Development project; or\n7. in the case of a Developer, deals with a real estate broker who is not registered on the Real Estate Brokers Register maintained by the Department in accordance with Bylaw No. (85) of 2006 Concerning the Real Estate Brokers Register in the Emirate of Dubai."
   },
   {
    "no": 17,
-   "text": "A Developer will\nbe struck-off the Register where:\n\n1. he is declared bankrupt;\n\n2. he fails, without an acceptable reason, to\ncommence construction works after the lapse of six (6) months from the date on\nwhich he was granted permission to sell Units off-plan;\n\n3. the licence granted to the Developer by the\nlicensing entity is revoked;\n\n4. he commits any of the violations stipulated in paragraphs\n(16) (2), (3), (4), and (5) of this Law; or\n\n5. he violates any of the laws and bylaws\nregulating the activity of Real Estate Development in the Emirate.\n\nChapter\nFive\n\nFinal\nProvisions"
+   "heading": "",
+   "text": "A Developer will be struck-off the Register where:\n1. he is declared bankrupt;\n2. he fails, without an acceptable reason, to commence construction works after the lapse of six (6) months from the date on which he was granted permission to sell Units off-plan;\n3. the licence granted to the Developer by the licensing entity is revoked;\n4. he commits any of the violations stipulated in paragraphs (16) (2), (3), (4), and (5) of this Law; or\n5. he violates any of the laws and bylaws regulating the activity of Real Estate Development in the Emirate.\nChapter Five"
   },
   {
    "no": 18,
-   "text": "Developers carrying on business at the date on which\nthis Law comes into force must comply with it within six (6) months from the\ndate on which it is published in the Official Gazette. The Department may\nextend this period as it deems appropriate."
+   "heading": "Final Provisions",
+   "text": "Developers carrying on business at the date on which this Law comes into force must comply with it within six (6) months from the date on which it is published in the Official Gazette. The Department may extend this period as it deems appropriate."
   },
   {
    "no": 19,
-   "text": "The Department may charge fees for any services\nprovided in accordance with this Law."
+   "heading": "",
+   "text": "The Department may charge fees for any services provided in accordance with this Law."
   },
   {
    "no": 20,
-   "text": "Any provision in any other law or bylaw will be repealed to the extent that\nit contradicts the provisions of this Law."
+   "heading": "",
+   "text": "Any provision in any other law or bylaw will be repealed to the extent that it contradicts the provisions of this Law."
   },
   {
    "no": 21,
-   "text": "The Chairman will issue the resolutions required for the\nimplementation of this Law."
+   "heading": "",
+   "text": "The Chairman will issue the resolutions required for the implementation of this Law."
   },
   {
    "no": 22,
-   "text": "This Law will\nbe published in the Official\nGazette and will come\ninto force on the day on which it is published.\n\nMohammed bin Rashid Al Maktoum\n\nRuler of Dubai\n\nIssued in Dubai on 6 May 2007\n\nCorresponding to 19\nRabi al-Thani 1428 A.H.\n\n�2015 The Supreme Legislation Committee in the\nEmirate of Dubai\n\n[1]Every effort has been made to produce an accurate and\ncomplete English version of this legislation. However, for the purpose of its\ninterpretation and application, reference must be made to the original Arabic\ntext. In case of conflict the Arabic text will prevail."
+   "heading": "",
+   "text": "This Law will be published in the Official Gazette and will come into force on the day on which it is published.\n\nMohammed bin Rashid Al Maktoum\nRuler of Dubai\nIssued in Dubai on 6 May 2007\nCorresponding to 19 Rabi al-Thani 1428 A.H."
   }
  ],
- "text_chars": 10536
+ "text_chars": 10437
 }
