@@ -16,11 +16,9 @@ jobs:
       max-parallel: 5
       matrix:
         include:          # the Land Department serves the current year only; earlier years come from the public copy (history.py)
-          - { kind: rent, from: '2026-01', to: '2026-02' }
-          - { kind: rent, from: '2026-03', to: '2026-04' }
-          - { kind: rent, from: '2026-05', to: '2026-06' }
-          - { kind: rent, from: '2026-07', to: '2026-09' }
-          - { kind: tx, from: '2026-01', to: '2026-10' }
+          - { kind: rent, from: '2026-05', to: '2026-05' }
+          - { kind: rent, from: '2026-07', to: '2026-07' }
+          - { kind: rent, from: '2026-09', to: '2026-09' }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

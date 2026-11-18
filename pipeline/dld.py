@@ -107,7 +107,7 @@ def tx_month(ym):
         v = num(r.get('TRANS_VALUE')) or 0.0
         groups[g]['count'] += 1
         groups[g]['value'] += v
-        a = (r.get('AREA_EN') or 'Unknown').strip().title()
+        a = str(r.get('AREA_EN') or 'Unknown').strip().title()
         if g == 'Mortgage':
             area[a]['mortgages'] += 1
         elif g == 'Gifts':
@@ -142,7 +142,7 @@ def tx_month(ym):
                     ppsqm_flat.append(pp); A['ppsqm_flat'].append(pp)
                 elif sub == 'Villa':
                     ppsqm_villa.append(pp); A['ppsqm_villa'].append(pp)
-        p = (r.get('PROJECT_EN') or '').strip()
+        p = str(r.get('PROJECT_EN') or '').strip()
         if p:
             projects[p]['sales'] += 1
             projects[p]['value'] += v
@@ -183,7 +183,7 @@ def rent_month(ym):
         ver[v] += 1
         amt = num(r.get('ANNUAL_AMOUNT')) or num(r.get('CONTRACT_AMOUNT'))
         sub = r.get('PROP_SUB_TYPE_EN') or r.get('PROP_TYPE_EN') or 'Other'
-        a = (r.get('AREA_EN') or 'Unknown').strip().title()
+        a = str(r.get('AREA_EN') or 'Unknown').strip().title()
         A = area[a]
         A['contracts'] += 1
         A['new'] += v == 'New'
@@ -194,7 +194,7 @@ def rent_month(ym):
             if key:
                 A[key].append(amt)
             if sub == 'Flat':
-                rooms = (r.get('ROOMS') or '').strip() or 'Not stated'
+                rooms = str(r.get('ROOMS') if r.get('ROOMS') is not None else '').strip() or 'Not stated'
                 flat_rooms[rooms].append(amt)
                 A['flat_rooms'][rooms].append(amt)
     areas = {a: {'contracts': A['contracts'], 'new': A['new'],
