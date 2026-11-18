@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['site/**', 'pipeline/build.py', 'data/official.json', '.github/workflows/site.yml']
+    paths: ['site/**', 'pipeline/build.py', 'pipeline/lawlib.py', 'data/official.json', 'data/guide/**', 'data/laws/**', '.github/workflows/site.yml']
 
 permissions:
   contents: read

@@ -1,0 +1,704 @@
+{
+ "checked": "2026-11-18",
+ "note": "Plain-language summaries of the official English texts on the Dubai Legal Portal. Each answer names the articles it is based on. Information only, not legal advice; the Arabic text of each law prevails.",
+ "topics": [
+  {
+   "id": "renting",
+   "title": "Renting a home or office",
+   "intro": "Dubai's tenancy law (Law 26 of 2007, as amended by Law 33 of 2008) and the rent increase decree (Decree 43 of 2013)."
+  },
+  {
+   "id": "owning",
+   "title": "Owning in a building or community",
+   "intro": "The jointly owned property law (Law 6 of 2019): service charges, owners committees and management companies."
+  },
+  {
+   "id": "offplan",
+   "title": "Buying off-plan",
+   "intro": "The escrow law (Law 8 of 2007) and the interim property register law (Law 13 of 2008, as amended)."
+  }
+ ],
+ "answers": [
+  {
+   "id": "rent-increase",
+   "topic": "renting",
+   "tool": "rentcheck",
+   "q": "How much can my landlord raise the rent when the lease is renewed?",
+   "a": [
+    "It depends on how far your current rent is below the average rent for similar homes in the official rental index. If it is no more than 10% below, there is no increase. If it is 11% to 20% below, the most is 5% of your current rent; 21% to 30% below, 10%; 31% to 40% below, 15%; more than 40% below, 20%.",
+    "The rule applies to every landlord in Dubai, private or government, including free zones such as DIFC. The average rent of similar units comes from the rent index approved by RERA, which is now the Dubai Land Department's Smart Rental Index."
+   ],
+   "cite": [
+    {
+     "law": "decree43",
+     "art": 1
+    },
+    {
+     "law": "decree43",
+     "art": 2
+    },
+    {
+     "law": "decree43",
+     "art": 3
+    }
+   ],
+   "tags": [
+    "rent increase",
+    "renewal",
+    "rental index",
+    "RERA calculator",
+    "cap",
+    "DIFC",
+    "free zone"
+   ]
+  },
+  {
+   "id": "notice-90",
+   "topic": "renting",
+   "tool": "rentcheck",
+   "q": "How much notice is needed to change the rent or other terms at renewal?",
+   "a": [
+    "Whoever wants to change the rent or any other term at renewal must tell the other side at least 90 days before the lease ends, unless the lease itself says something different.",
+    "Before the lease ends, both sides can agree to raise or lower the rent or change other terms. If they cannot agree, the rent disputes tribunal (today the Rental Disputes Settlement Centre) can set a fair rent, looking at the rent index, the condition of the property, rents of similar property nearby and the economy."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 14
+    },
+    {
+     "law": "tenancy",
+     "art": 13
+    },
+    {
+     "law": "tenancy",
+     "art": 9
+    }
+   ],
+   "tags": [
+    "90 days",
+    "notice",
+    "renewal",
+    "change terms",
+    "fair rent",
+    "tribunal"
+   ]
+  },
+  {
+   "id": "end-early",
+   "topic": "renting",
+   "q": "Can the landlord or I end the lease before it expires?",
+   "a": [
+    "While a lease is running, neither side can end it on their own. It can only end early by agreement between both sides, or in the cases the tenancy law allows.",
+    "For a landlord, those cases are the eviction grounds listed in Article 25(1), such as unpaid rent. Many leases also contain an early exit clause agreed by both sides; that is part of what was agreed."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 7
+    },
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "early termination",
+    "break lease",
+    "leave early",
+    "cancel lease"
+   ]
+  },
+  {
+   "id": "stay-on",
+   "topic": "renting",
+   "q": "What happens if my lease ends and I simply stay on?",
+   "a": [
+    "If the lease ends and you keep living there without the landlord objecting, the lease renews automatically on the same terms.",
+    "The new term is the same as the old one or one year, whichever is shorter."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 6
+    }
+   ],
+   "tags": [
+    "automatic renewal",
+    "expiry",
+    "holding over",
+    "lease ended"
+   ]
+  },
+  {
+   "id": "evict-during",
+   "topic": "renting",
+   "q": "When can a landlord evict a tenant before the lease ends?",
+   "a": [
+    "Only in the cases listed in the law. They include: rent not paid within 30 days of a formal notice; subletting without the landlord's written approval; illegal use; business premises left empty without good reason for 30 days in a row or 90 days in a year; dangerous changes or deliberate or grossly negligent damage; use for a different purpose; a building likely to collapse, proven by a Dubai Municipality report; any other breach not put right within 30 days of a notice; and demolition ordered by the government for urban development.",
+    "For these cases the landlord's notice must go through a notary public or by registered mail. Some of the grounds (unpaid rent and empty business premises) apply unless the lease says otherwise."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "eviction",
+    "unpaid rent",
+    "breach",
+    "notary",
+    "registered mail",
+    "30 days"
+   ]
+  },
+  {
+   "id": "evict-expiry",
+   "topic": "renting",
+   "q": "Can my landlord refuse to renew and ask me to leave when the lease ends?",
+   "a": [
+    "Only for one of four reasons: the owner will demolish and rebuild, or add new structures, with the required permits; the property needs restoration or major maintenance that cannot be done with the tenant inside, confirmed by a Dubai Municipality technical report; the owner wants it for themselves or a first-degree relative and has no other suitable property; or the owner wants to sell it.",
+    "The landlord must give the reason at least 12 months before the eviction date, by notary public or registered mail."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "eviction",
+    "12 months",
+    "own use",
+    "sale",
+    "demolition",
+    "renovation",
+    "notary",
+    "registered mail"
+   ]
+  },
+  {
+   "id": "own-use",
+   "topic": "renting",
+   "q": "If I had to leave because the owner wanted to live there, can they rent it to someone else?",
+   "a": [
+    "When the tribunal allows an eviction because the owner or a first-degree relative will use the property, the owner may not rent it to anyone else for at least 2 years for a home, or 3 years for other property, from the date they take it back.",
+    "If they do, the former tenant can ask the tribunal for fair compensation."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 26
+    },
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "own use",
+    "relative",
+    "re-rent",
+    "compensation",
+    "2 years",
+    "3 years"
+   ]
+  },
+  {
+   "id": "sold",
+   "topic": "renting",
+   "q": "What happens to my lease if the property is sold?",
+   "a": [
+    "A sale does not end a fixed-term lease: you can stay until the end of the term under the lease you signed with the previous owner.",
+    "Separately, an owner who wants to sell can ask the tenant to leave when the lease ends, but only with at least 12 months' notice by notary public or registered mail."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 28
+    },
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "sale",
+    "new owner",
+    "sold",
+    "transfer"
+   ]
+  },
+  {
+   "id": "maintenance",
+   "topic": "renting",
+   "q": "Who pays for maintenance and repairs?",
+   "a": [
+    "Unless the lease says otherwise, the landlord is responsible during the lease for maintenance and for repairing any defect or damage that affects your use of the property.",
+    "The tenant must pay rent on time and look after the property as an ordinary person looks after their own. A tenant may not make changes or carry out works without the landlord's permission and any licences required."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 16
+    },
+    {
+     "law": "tenancy",
+     "art": 19
+    }
+   ],
+   "tags": [
+    "maintenance",
+    "repairs",
+    "AC",
+    "damage",
+    "alterations"
+   ]
+  },
+  {
+   "id": "deposit",
+   "topic": "renting",
+   "q": "Do I get my security deposit back?",
+   "a": [
+    "A landlord may take a security deposit at the start, and must refund it, or whatever is left of it, when the lease ends.",
+    "You must hand the property back in the condition you received it, apart from ordinary wear and tear or damage beyond your control. If you disagree about the condition, the tribunal decides."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 20
+    },
+    {
+     "law": "tenancy",
+     "art": 21
+    }
+   ],
+   "tags": [
+    "deposit",
+    "refund",
+    "move out",
+    "wear and tear",
+    "condition"
+   ]
+  },
+  {
+   "id": "sublet",
+   "topic": "renting",
+   "q": "Can I sublet or pass my lease to someone else?",
+   "a": [
+    "Unless the lease says otherwise, you need the landlord's written consent to sublet or hand over the use of the property.",
+    "Subletting without written approval is one of the grounds on which a landlord can seek eviction during the lease, and the eviction then covers the subtenant too."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 24
+    },
+    {
+     "law": "tenancy",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "sublet",
+    "sublease",
+    "assign",
+    "holiday home",
+    "roommate"
+   ]
+  },
+  {
+   "id": "services-cut",
+   "topic": "renting",
+   "q": "What can I do if my landlord cuts off services or harasses me?",
+   "a": [
+    "A landlord may not cut off services or interfere with a tenant's use of the property in any way. A 2026 explanatory note says this covers electricity, water, air-conditioning, maintenance and similar services, locking a tenant out or putting up barriers, and threats or harassment aimed at making the tenant leave.",
+    "The tenant can go to the police station for the area. The note says the police should act to stop the interference and restore services, and give the tenant a copy of an official report, without the tenant first needing a decision from the Rental Disputes Settlement Centre. With that report, the tenant can then claim compensation at the Centre."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 34
+    },
+    {
+     "law": "note34",
+     "art": 0
+    }
+   ],
+   "tags": [
+    "services",
+    "electricity",
+    "water",
+    "harassment",
+    "police",
+    "quiet enjoyment",
+    "lockout",
+    "air-conditioning",
+    "locked out",
+    "RDSC"
+   ]
+  },
+  {
+   "id": "ejari",
+   "topic": "renting",
+   "q": "Does my lease have to be registered?",
+   "a": [
+    "Yes. Every lease covered by the tenancy law, and any change to it, must be registered with RERA; in practice this is done through Ejari.",
+    "The lease must describe the property clearly and state its purpose, term, rent and how it is paid, and the owner's name if the landlord is not the owner."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 4
+    }
+   ],
+   "tags": [
+    "Ejari",
+    "registration",
+    "RERA",
+    "lease contract"
+   ]
+  },
+  {
+   "id": "death",
+   "topic": "renting",
+   "q": "What happens to a lease if the landlord or tenant dies?",
+   "a": [
+    "The lease does not end. It continues with the heirs.",
+    "A tenant's heirs can choose to end it by notifying the landlord. It then ends 30 days after the notice or on the lease's expiry date, whichever comes first."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 27
+    }
+   ],
+   "tags": [
+    "death",
+    "heirs",
+    "family"
+   ]
+  },
+  {
+   "id": "return",
+   "topic": "renting",
+   "q": "If my building is rebuilt or renovated, can I move back in?",
+   "a": [
+    "Yes, the tenant has the first right to return once the landlord has rebuilt or renovated the property. The rent is then set on the same basis the tribunal uses for a fair rent.",
+    "The tenant must use this right within 30 days of the landlord's notice."
+   ],
+   "cite": [
+    {
+     "law": "tenancy",
+     "art": 29
+    }
+   ],
+   "tags": [
+    "first refusal",
+    "rebuild",
+    "renovation",
+    "return"
+   ]
+  },
+  {
+   "id": "sc-calc",
+   "topic": "owning",
+   "q": "How is my service charge worked out?",
+   "a": [
+    "Each owner pays a share of the yearly service charges for running, maintaining and repairing the common parts. The share is based on the area of your unit compared with the total area of the building or project.",
+    "The area used is the one recorded for your unit in the Real Property Register. The developer pays the share for units it has not sold, and for sold units where the sale contract says it will pay."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 25
+    }
+   ],
+   "tags": [
+    "service charge",
+    "how calculated",
+    "area",
+    "per square foot",
+    "share"
+   ]
+  },
+  {
+   "id": "sc-approve",
+   "topic": "owning",
+   "q": "Who approves the service charge budget?",
+   "a": [
+    "A management company or developer may not charge owners anything for the common parts without RERA's approval first.",
+    "RERA approves the service charge budget only after a RERA-recognised audit firm has checked it. When needed, RERA can approve a temporary budget until the audited one is ready."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 27
+    }
+   ],
+   "tags": [
+    "budget",
+    "approval",
+    "RERA",
+    "audit",
+    "Mollak",
+    "temporary budget"
+   ]
+  },
+  {
+   "id": "sc-spend",
+   "topic": "owning",
+   "q": "What can service charge money be spent on?",
+   "a": [
+    "It must sit in a separate bank account for the building, paid in within 7 working days of collection, and the management company's creditors cannot touch it.",
+    "It may only be spent on a set list: cleaning; security and safety; running, maintaining, repairing and improving the common parts; building insurance; audit fees; the management company's fee as set by RERA; the developer's approved admin costs in major projects; a reserve fund; RERA's inspection fees; and other approved costs. The reserve fund is kept in its own account and can only be used in a critical emergency or with RERA's approval."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 30
+    }
+   ],
+   "tags": [
+    "service charge",
+    "spending",
+    "reserve fund",
+    "sinking fund",
+    "bank account",
+    "insurance"
+   ]
+  },
+  {
+   "id": "sc-withhold",
+   "topic": "owning",
+   "q": "Can I refuse to pay service charges because the building is badly managed?",
+   "a": [
+    "No. An owner may not refuse to pay service charges that RERA has approved, and cannot give up their share of the common parts to avoid paying.",
+    "Complaints go through the owners committee. It passes them to the management company, and if they are not dealt with within 14 days, to RERA."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 28
+    },
+    {
+     "law": "jointly",
+     "art": 24
+    }
+   ],
+   "tags": [
+    "withhold",
+    "refuse to pay",
+    "complaint",
+    "bad management"
+   ]
+  },
+  {
+   "id": "sc-unpaid",
+   "topic": "owning",
+   "q": "What happens if an owner does not pay service charges?",
+   "a": [
+    "Unpaid service charges are a lien on the unit, and the unit cannot be sold or transferred until they are paid.",
+    "The management company must first give the owner 30 days' written notice in a form approved by RERA. After that it can enforce the debt through the execution judge at the Rental Disputes Settlement Centre, which can order the unit sold at public auction, and the owner pays the court costs."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 32
+    }
+   ],
+   "tags": [
+    "unpaid",
+    "arrears",
+    "lien",
+    "auction",
+    "RDSC",
+    "30 days"
+   ]
+  },
+  {
+   "id": "sc-block",
+   "topic": "owning",
+   "q": "Can the management company block my access to force me to pay?",
+   "a": [
+    "No. A developer or management company may not stop an owner from taking or using their unit, or using the common parts and facilities, to force payment of service charges or utility charges outside the procedures in the law.",
+    "The law's route for unpaid charges is the formal notice and enforcement process in Article 32."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 29
+    },
+    {
+     "law": "jointly",
+     "art": 32
+    }
+   ],
+   "tags": [
+    "access card",
+    "gym",
+    "pool",
+    "parking",
+    "blocked",
+    "handover"
+   ]
+  },
+  {
+   "id": "sc-tenant",
+   "topic": "owning",
+   "q": "Does the owner or the tenant pay the service charges?",
+   "a": [
+    "The owner pays, unless the lease says the tenant will.",
+    "Even then, the owner remains liable if the tenant does not pay."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 16
+    }
+   ],
+   "tags": [
+    "tenant",
+    "landlord",
+    "who pays",
+    "service charge"
+   ]
+  },
+  {
+   "id": "committee",
+   "topic": "owning",
+   "q": "How is an owners committee formed and what does it do?",
+   "a": [
+    "Once at least 10% of the units are registered in their owners' names, RERA appoints an owners committee of up to 9 members. Members must be owners who live in the building, pay their service charges and take part in meetings.",
+    "The committee checks that the building is properly managed, reviews the yearly budgets and can ask for financial reports, passes on owners' complaints (the management company has 14 days to deal with them before they go to RERA), and in projects that are neither major nor hotel projects can ask RERA to replace the management company."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 22
+    },
+    {
+     "law": "jointly",
+     "art": 24
+    },
+    {
+     "law": "jointly",
+     "art": 18
+    }
+   ],
+   "tags": [
+    "owners committee",
+    "owners association",
+    "board",
+    "members",
+    "RERA"
+   ]
+  },
+  {
+   "id": "replace-manager",
+   "topic": "owning",
+   "q": "Can owners get the management company replaced?",
+   "a": [
+    "In buildings outside the major and hotel project categories, the owners committee can ask RERA to replace the management company and advise on the new one.",
+    "If RERA finds the company incompetent, it asks the committee's view, gives the company a written warning with 14 days to respond, has the service charge account audited, and gives the company 30 days to hand over to the replacement."
+   ],
+   "cite": [
+    {
+     "law": "jointly",
+     "art": 24
+    },
+    {
+     "law": "jointly",
+     "art": 38
+    }
+   ],
+   "tags": [
+    "management company",
+    "replace",
+    "change manager",
+    "incompetent"
+   ]
+  },
+  {
+   "id": "escrow",
+   "topic": "offplan",
+   "q": "Is my off-plan payment protected?",
+   "a": [
+    "Developers selling off-plan must pay buyers' money into an escrow account opened in the project's name, with a separate account for each project. The money may only be used to build that project, and the developer's creditors cannot claim it.",
+    "Buyers can see and get copies of their own records. When the project gets its completion certificate, 5% is held back and released to the developer one year after the units are registered in buyers' names. If a project stalls, the escrow agent, after consulting the Land Department, must take steps to get it finished or refund buyers."
+   ],
+   "cite": [
+    {
+     "law": "escrow",
+     "art": 9
+    },
+    {
+     "law": "escrow",
+     "art": 12
+    },
+    {
+     "law": "escrow",
+     "art": 14
+    },
+    {
+     "law": "escrow",
+     "art": 15
+    }
+   ],
+   "tags": [
+    "escrow",
+    "off-plan",
+    "developer",
+    "protected",
+    "refund",
+    "stalled project"
+   ]
+  },
+  {
+   "id": "offplan-register",
+   "topic": "offplan",
+   "q": "Does an off-plan purchase have to be registered?",
+   "a": [
+    "Yes. Every sale or other dealing in an off-plan unit must be entered in the Interim Property Register at the Land Department.",
+    "A sale or transfer that is not entered in that register is void."
+   ],
+   "cite": [
+    {
+     "law": "interim",
+     "art": 3
+    }
+   ],
+   "tags": [
+    "Oqood",
+    "interim register",
+    "registration",
+    "off-plan"
+   ]
+  },
+  {
+   "id": "offplan-default",
+   "topic": "offplan",
+   "q": "What happens if an off-plan buyer stops paying?",
+   "a": [
+    "The developer must report it to the Land Department, which gives the buyer 30 days' written notice to pay and may try to broker a settlement. If the buyer still does not pay, the Land Department certifies how complete the project is, and the developer's options depend on that.",
+    "Above 80% complete, the developer can keep the contract and claim the balance, ask for the unit to be sold at auction, or cancel and keep up to 40% of the price. Between 60% and 80%, it can cancel and keep up to 40%; below 60% (once building has started), cancel and keep up to 25%. Any amount above that must be refunded within one year, or within 60 days of reselling the unit if sooner. If work never started for reasons outside the developer's control, or RERA cancelled the project, all payments are refunded."
+   ],
+   "cite": [
+    {
+     "law": "interim",
+     "art": 11
+    }
+   ],
+   "tags": [
+    "default",
+    "missed payment",
+    "cancel",
+    "40%",
+    "25%",
+    "termination",
+    "off-plan"
+   ]
+  }
+ ]
+}

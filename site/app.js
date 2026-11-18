@@ -124,7 +124,7 @@ window.addEventListener('hashchange', route);
 
 function render(view, redraw) {
   current = view;
-  if (!RE && !OFF) return;
+  if (!RE && !OFF && !LAWS) return;
   const f = VIEWS[view];
   if (f) f();
 }
@@ -197,7 +197,13 @@ function viewDashboard() {
     biz && kpi('Business licences issued, Jan to Jun 2026', fmt(biz.value), `Mainland and free zones. <span class="src">${srcLine(biz)}</span>`),
   ].filter(Boolean).join('');
   const areas = RE ? RE.areas.slice(0, 10) : [];
+  const nQ = LAWS ? LAWS.answers.length : 0;
+  const tools = `<div class="tool-strip">
+    <a class="card tool-card" href="#rentcheck"><span class="tool-ic">${icon('coins')}</span><span><strong>Renewing a lease?</strong><span>See the most your rent can legally go up, with the working shown and your notice deadline.</span></span>${icon('next')}</a>
+    <a class="card tool-card" href="#laws"><span class="tool-ic">${icon('legis')}</span><span><strong>Laws in plain words</strong><span>${nQ ? nQ + ' questions' : 'Common questions'} on renting, service charges and off-plan, answered from the official texts with article numbers.</span></span>${icon('next')}</a>
+  </div>`;
   body('dashboard', `
+    ${tools}
     ${RE ? `<div class="kpis">${k1}</div>` : ''}
     <div class="kpis" style="margin-top:var(--gap)">${k2}</div>
     ${RE ? `<div class="grid" style="margin-top:var(--gap)">
@@ -524,6 +530,7 @@ function viewSources() {
     ${card('Refreshed every day', '', `<div class="table-wrap" style="max-height:none"><table class="data"><thead><tr><th>Data</th><th>Covers</th><th>Last refreshed</th><th>Source</th></tr></thead><tbody>
       ${RE ? `<tr><td>Property sales, mortgages and gifts</td><td>${ml(RE.api_first)} to today</td><td>${new Date(RE.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Dubai' })} Dubai time</td><td>${DLD_SRC()}</td></tr>` : ''}
       ${RE && RE.rent.first_month ? `<tr><td>Rental contracts (Ejari)</td><td>${ml(RE.rent.first_month)} to today</td><td>Same refresh</td><td>${DLD_SRC()}</td></tr>` : ''}
+      ${LAWS ? `<tr><td>Law texts (${LAWS.laws.length} laws, ${LAWS.laws.reduce((t, l) => t + l.articles.length, 0)} articles)</td><td>In force as published</td><td>Every week; last fetched ${dlong(new Date(LAWS.laws.map(l => l.fetched).sort().pop() + 'T00:00:00'))}</td><td><a href="https://dlp.dubai.gov.ae/" target="_blank" rel="noopener">Dubai Legal Portal</a>, official English texts (the Arabic text prevails)</td></tr>` : ''}
       ${RE && RE.copy_source ? `<tr><td>Property sales before ${mlong(RE.api_first)}, Dubai-wide</td><td>${ml(RE.first_month)} to ${ml((RE.monthly.filter(r => r.src === 'copy').slice(-1)[0] || {}).m)}</td><td>Fixed history</td><td><a href="${esc(RE.copy_source.url)}" target="_blank" rel="noopener">Dubai Real Estate Data</a>, a public copy of Land Department records (CC BY 4.0)</td></tr>` : ''}
     </tbody></table></div>`)}
     <div style="margin-top:var(--gap)">${card('Official figures as published', OFF ? `Checked ${esc(OFF.checked)}` : '', `<div class="table-wrap" style="max-height:none"><table class="data wrap"><thead><tr><th>Figure</th><th>Period</th><th>Produced by</th><th>Published</th></tr></thead><tbody>${rows}</tbody></table></div>`)}</div>`);
@@ -536,15 +543,206 @@ function viewAbout() {
     <p>Property figures are refreshed every day from the Dubai Land Department's open data. Nothing on the site is a forecast, a valuation or investment advice.</p>
   </div>`);
 }
+/* --------------------------------------------------------------- RENT INCREASE CHECK (Decree 43 of 2013) */
+const INDEX_URL = 'https://dubailand.gov.ae/en/eservices/rental-index/';
+const BANDS = [
+  { upTo: 10, inc: 0, k: 'a', label: 'Up to 10% below the average' },
+  { upTo: 20, inc: 5, k: 'b', label: '11% to 20% below' },
+  { upTo: 30, inc: 10, k: 'c', label: '21% to 30% below' },
+  { upTo: 40, inc: 15, k: 'd', label: '31% to 40% below' },
+  { upTo: Infinity, inc: 20, k: 'e', label: 'More than 40% below' }];
+const RC = { rent: '', avg: '', end: '', area: '', type: 'flat' };
+const artLink = (law, no, text) => `<a href="#laws/${law}-${no}">${text || 'Article ' + no}</a>`;
+const dlong = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const num = v => { const n = parseFloat(String(v).replace(/[^0-9.]/g, '')); return n > 0 ? n : null; };
+
+function viewRentcheck() {
+  head('rentcheck', 'Rent increase check', 'The most a landlord can raise the rent when a lease is renewed, worked out from Dubai\'s rent increase decree.');
+  const areas = RE && RE.rent && RE.rent.areas ? [...RE.rent.areas].sort((a, b) => a.name.localeCompare(b.name)) : [];
+  body('rentcheck', `
+    <div class="grid">
+      <div class="col-6">${card('Your numbers', 'Yearly amounts in dirhams. Nothing you type leaves this page.', `
+        <form class="rc-form" id="rc-form" onsubmit="return false">
+          <label class="fld"><span>Your current yearly rent (AED)</span><input id="rc-rent" inputmode="decimal" autocomplete="off" placeholder="e.g. 85,000" value="${esc(RC.rent)}"></label>
+          <label class="fld"><span>Average yearly rent for similar homes (AED)</span><input id="rc-avg" inputmode="decimal" autocomplete="off" placeholder="e.g. 100,000" value="${esc(RC.avg)}">
+            <small>Look up your building on the <a href="${INDEX_URL}" target="_blank" rel="noopener">Dubai Land Department's Smart Rental Index</a>. The decree says this average comes from the official index (${artLink('decree43', 3)}).</small></label>
+          <label class="fld"><span>Lease end date <em>(optional)</em></span><input id="rc-end" type="date" value="${esc(RC.end)}"></label>
+          ${areas.length ? `<div class="fld-row">
+            <label class="fld"><span>Area <em>(optional, for context)</em></span><select id="rc-area"><option value="">Choose an area</option>${areas.map(a => `<option${a.name === RC.area ? ' selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>
+            <label class="fld"><span>Type</span><select id="rc-type"><option value="flat"${RC.type === 'flat' ? ' selected' : ''}>Flat</option><option value="villa"${RC.type === 'villa' ? ' selected' : ''}>Villa</option></select></label>
+          </div>` : ''}
+        </form>`)}</div>
+      <div class="col-6"><div class="card rc-out" id="rc-out" aria-live="polite"></div></div>
+      <div class="col-12">${card('The bands in the decree', `${artLink('decree43', 1, 'Decree 43 of 2013, Article 1')}. The increase is a percentage of your current rent. It applies to every landlord in Dubai, including free zones such as DIFC (${artLink('decree43', 2)}).`,
+        `<div class="table-scroll"><table class="data rc-bands" id="rc-bands"><thead><tr><th>How far your rent is below the average</th><th class="num">Most the rent can go up</th></tr></thead>
+        <tbody>${BANDS.map(b => `<tr data-k="${b.k}"><td data-l="Your rent is">${b.label}</td><td class="num" data-l="Most it can go up">${b.inc ? b.inc + '% of current rent' : 'No increase'}</td></tr>`).join('')}</tbody></table></div>`)}</div>
+      <div class="col-6"><div class="card" id="rc-notice"></div></div>
+      <div class="col-6"><div class="card" id="rc-area-card"></div></div>
+    </div>
+    <p class="foot-src">Information only, not legal advice. Worked out from the official English text of ${artLink('decree43', 1, 'Decree 43 of 2013')} and ${artLink('tenancy', 14, 'Article 14 of the tenancy law')} on the Dubai Legal Portal; the Arabic text prevails. The Land Department's own calculator, linked from the <a href="${INDEX_URL}" target="_blank" rel="noopener">rental index</a>, gives the official answer, and disputes go to the Rental Disputes Settlement Centre. <a href="#laws/q-rent-increase">More about rent increases</a></p>`);
+  const upd = () => {
+    RC.rent = $('#rc-rent').value; RC.avg = $('#rc-avg').value; RC.end = $('#rc-end').value;
+    if ($('#rc-area')) { RC.area = $('#rc-area').value; RC.type = $('#rc-type').value; }
+    rcCalc();
+  };
+  $$('#rc-form input, #rc-form select').forEach(el => el.addEventListener('input', upd));
+  rcCalc();
+}
+function rcBand(rent, avg) {
+  const gap = (avg - rent) / avg * 100, g = Math.round(gap);
+  const band = gap <= 0 ? BANDS[0] : BANDS.find(b => g <= b.upTo);
+  const nearEdge = [10, 20, 30, 40].some(e => gap > e && gap < e + 1);   // between two whole-percent bands
+  return { gap, g, band, nearEdge, inc: rent * band.inc / 100 };
+}
+function rcCalc() {
+  const rent = num(RC.rent), avg = num(RC.avg), out = $('#rc-out');
+  if (!out) return;
+  $$('#rc-bands tbody tr').forEach(tr => tr.classList.remove('is-sel'));
+  if (!rent || !avg) {
+    out.innerHTML = `<div class="card-head"><div><h2>The result</h2><p class="card-sub">Fill in your rent and the average rent for similar homes.</p></div></div>
+      <ol class="rc-steps"><li>Find your building on the <a href="${INDEX_URL}" target="_blank" rel="noopener">Smart Rental Index</a> and note the average yearly rent for a home like yours.</li><li>Type it in with your current rent.</li><li>See the most your rent can go up, and how it is worked out.</li></ol>`;
+  } else {
+    const r = rcBand(rent, avg), b = r.band;
+    $(`#rc-bands tbody tr[data-k="${b.k}"]`).classList.add('is-sel');
+    const head = b.inc ? `Up to ${b.inc}%` : 'No increase';
+    const working = r.gap <= 0
+      ? `Your rent (AED ${fmt(rent)}) is not below the average for similar homes (AED ${fmt(avg)}), so the decree allows no increase.`
+      : `The average for similar homes is AED ${fmt(avg)}. Your rent is AED ${fmt(avg - rent)} below it, which is ${fmt(r.gap, 1)}% of the average${Math.abs(r.gap - r.g) > 0.001 ? `, or ${r.g}% rounded to a whole percent` : ''}. That is in the band "${b.label.toLowerCase()}", so ${b.inc ? `the most the rent can rise is ${b.inc}% of your current rent: AED ${fmt(rent)} × ${b.inc}% = AED ${fmt(r.inc)}.` : 'the rent cannot be raised.'}`;
+    out.innerHTML = `<div class="card-head"><div><h2>The result</h2><p class="card-sub">Under ${artLink('decree43', 1, 'Decree 43 of 2013, Article 1')}</p></div></div>
+      <div class="rc-big"><span class="kpi-value">${head}</span>${b.inc ? `<span class="rc-new">AED ${fmt(r.inc)} more a year, so at most <strong>AED ${fmt(rent + r.inc)}</strong></span>` : `<span class="rc-new">Rent stays at most <strong>AED ${fmt(rent)}</strong></span>`}</div>
+      <p class="rc-working"><strong>How it's worked out.</strong> ${working}</p>
+      ${r.nearEdge ? `<p class="rc-warn">${icon('alert')}<span>Your rent is close to the edge of a band. The decree's bands are written in whole percents, so we round the gap to the nearest whole percent; the Land Department's own calculator decides which band applies.</span></p>` : ''}
+      <p class="rc-small">This is the legal maximum, not what has to be paid. Landlord and tenant can agree less, and a change to the rent needs notice at least 90 days before the lease ends unless the lease says otherwise (${artLink('tenancy', 14)}).</p>`;
+  }
+  rcNotice(); rcArea();
+}
+function rcNotice() {
+  const el = $('#rc-notice'); if (!el) return;
+  const sub = `${artLink('tenancy', 14, 'Tenancy law, Article 14')}: whoever wants to change the rent or other terms at renewal must tell the other side at least 90 days before the lease ends, unless the lease says otherwise.`;
+  let inner = '<p class="rc-small">Add your lease end date to see the last day for notice.</p>';
+  if (RC.end) {
+    const end = new Date(RC.end + 'T00:00:00'), dl = new Date(end); dl.setDate(dl.getDate() - 90);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const days = Math.round((dl - today) / 864e5);
+    inner = `<div class="rc-big"><span class="kpi-value rc-date">${dlong(dl)}</span><span class="rc-new">90 days before the lease ends on ${dlong(end)}</span></div>
+      <p class="rc-small">${days > 0 ? `That is ${fmt(days)} day${days === 1 ? '' : 's'} from today.` : days === 0 ? 'That is today.' : `That date passed ${fmt(-days)} day${days === -1 ? '' : 's'} ago. Check your lease: it can set a different notice period. Disagreements about renewal terms go to the Rental Disputes Settlement Centre.`} If neither side asks for changes and you stay on, the lease renews on the same terms (${artLink('tenancy', 6)}).</p>`;
+  }
+  el.innerHTML = `<div class="card-head"><div><h2>Notice deadline</h2><p class="card-sub">${sub}</p></div></div>${inner}`;
+}
+function rcArea() {
+  const el = $('#rc-area-card'); if (!el) return;
+  const R = RE && RE.rent, a = R && RC.area ? rentRow(RC.area) : null, t = RC.type;
+  let inner = `<p class="rc-small">${R ? 'Choose an area to see what renters there paid in registered contracts.' : 'Rent contract figures are not available right now.'}</p>`;
+  if (a) {
+    const med = a[t], n = a['n_' + t];
+    inner = n >= 20 && med ? `<div class="rc-big"><span class="kpi-value">AED ${fmt(med)}</span><span class="rc-new">typical yearly rent of ${t}s in ${esc(a.name)}, from ${fmt(n)} contracts registered ${span(R.last12.from, R.last12.to)}</span></div>
+      <p class="rc-small">All sizes, new contracts and renewals together, so it is only a rough guide. It is not the rental index and cannot replace the index's average for homes like yours. <a href="#areas/${encodeURIComponent(a.name)}">Area profile</a></p>`
+      : `<p class="rc-small">Too few ${t} contracts registered in ${esc(a.name)} ${span(R.last12.from, R.last12.to)} to show a typical rent.</p>`;
+  }
+  el.innerHTML = `<div class="card-head"><div><h2>Rents in your area</h2><p class="card-sub">Rental contracts registered in Ejari, from ${DLD_SRC()}</p></div></div>${inner}`;
+}
+
+/* --------------------------------------------------------------- LAWS IN PLAIN WORDS */
+let LAWS = null;
+const LQ = { q: '', topic: '' };
+const lawById = id => LAWS.laws.find(l => l.id === id);
+const citeText = c => { const l = lawById(c.law); return c.art === 0 ? l.short : `${l.short}, Article ${c.art}`; };
+function hl(text, toks) {
+  let h = esc(text);
+  for (const t of toks) if (t.length > 1) h = h.replace(new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+  return h;
+}
+const toksOf = q => q.toLowerCase().split(/\s+/).map(t => t.replace(/[^\p{L}\p{N}%-]/gu, '')).filter(Boolean);
+const hay = q => (q.q + ' ' + q.a.join(' ') + ' ' + q.tags.join(' ')).toLowerCase();
+
+function qaCard(q, toks) {
+  const cites = q.cite.map(c => `<a class="cite" href="#laws/${c.law}-${c.art}">${esc(citeText(c))}</a>`).join('');
+  return `<article class="card qa" id="qa-${q.id}">
+    <h2>${hl(q.q, toks)}</h2>
+    ${q.a.map(p => `<p>${hl(p, toks)}</p>`).join('')}
+    ${q.review ? `<p class="rc-warn">${icon('alert')}<span>The official wording of an article this answer relies on changed after the answer was last checked. Read the article itself until it is reviewed.</span></p>` : ''}
+    ${q.tool === 'rentcheck' ? `<p><a class="btn" href="#rentcheck">${icon('coins')}<span>Check your own numbers</span></a></p>` : ''}
+    <div class="qa-foot"><span class="qa-based">Based on</span>${cites}<a class="qa-off" href="${esc(q.cite[0].url)}" target="_blank" rel="noopener">Official text ${icon('open')}</a></div>
+  </article>`;
+}
+function articleHTML(l, a) {
+  const paras = a.text.split(/\n+/).map(x => x.trim()).filter(Boolean).map(x => `<p>${esc(x)}</p>`).join('');
+  const t = a.no === 0 ? a.heading : `Article ${a.no}${a.heading ? ' · ' + esc(a.heading) : ''}`;
+  return `<details class="art" id="law-${l.id}-${a.no}"><summary>${t}</summary><div class="art-body prose">${paras}
+    <p class="meta">${a.amended_by ? `Wording as replaced by ${esc(a.amended_by)}. ` : ''}<a href="${esc(a.url)}" target="_blank" rel="noopener">Official text on the Dubai Legal Portal</a></p></div></details>`;
+}
+function viewLaws() {
+  if (!LAWS) { head('laws', 'Laws in plain words', ''); body('laws', loadingNote('The law library')); return; }
+  const checked = dlong(new Date(LAWS.checked + 'T00:00:00'));
+  head('laws', 'Laws in plain words', `${LAWS.answers.length} common questions about renting, owning and buying off-plan, answered from the official texts. Each answer names the articles it is based on. Checked ${checked}.`);
+  const topics = [{ id: '', title: 'All' }, ...LAWS.topics];
+  body('laws', `
+    <div class="law-tools">
+      <label class="law-search">${icon('search')}<input id="law-q" type="search" placeholder="Search questions and the full law text, e.g. deposit, eviction, service charge" value="${esc(LQ.q)}" aria-label="Search the laws"></label>
+      <div class="chips" role="group" aria-label="Topic">${topics.map(t => `<button type="button" class="chip${LQ.topic === t.id ? ' on' : ''}" data-t="${t.id}">${esc(t.title)}</button>`).join('')}</div>
+    </div>
+    <div id="law-results"></div>
+    ${card('Read the laws', `The official English texts, with later amendments put in place so each article reads as it is now. Fetched from the <a href="https://dlp.dubai.gov.ae/" target="_blank" rel="noopener">Dubai Legal Portal</a> every week.`,
+      LAWS.topics.map(t => `<h3 class="law-topic">${esc(t.title)}</h3>` + LAWS.laws.filter(l => l.topic === t.id).map(l => `
+        <details class="law" id="law-${l.id}"><summary><strong>${esc(l.short)}</strong><span>${esc(l.name)}${l.articles.length > 1 ? ` · ${l.articles.length} articles` : ''}</span></summary>
+          <div class="law-arts">${l.articles.map(a => articleHTML(l, a)).join('')}
+          <p class="meta">Sources: ${l.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`).join('; ')}. Fetched ${dlong(new Date(l.fetched + 'T00:00:00'))}.</p></div></details>`).join('')).join(''), 'law-lib')}
+    <p class="foot-src">${esc(LAWS.note)} For a dispute, the <a href="https://rdc.gov.ae/" target="_blank" rel="noopener">Rental Disputes Settlement Centre</a> decides.</p>`);
+  const q = $('#law-q');
+  q.addEventListener('input', () => { LQ.q = q.value; lawResults(); });
+  $$('.chips .chip').forEach(b => b.addEventListener('click', () => { LQ.topic = b.dataset.t; $$('.chips .chip').forEach(x => x.classList.toggle('on', x === b)); lawResults(); }));
+  lawResults();
+  if (currentArea) {
+    const id = currentArea.startsWith('q-') ? 'qa-' + currentArea.slice(2) : 'law-' + currentArea;
+    const el = document.getElementById(id);
+    if (el) {
+      if (el.tagName === 'DETAILS') { el.open = true; const law = el.closest('details.law'); if (law) law.open = true; }
+      el.classList.add('flash');
+      setTimeout(() => {   // the view scrolls under a sticky title bar: land the target just below it
+        const v = $('#view-laws'), bar = $('#view-laws .topbar');
+        v.scrollTop += el.getBoundingClientRect().top - (bar ? bar.getBoundingClientRect().bottom : 0) - 12;
+      }, 30);
+    }
+  }
+}
+function lawResults() {
+  const el = $('#law-results'); if (!el) return;
+  const toks = toksOf(LQ.q);
+  const qs = LAWS.answers.filter(q => (!LQ.topic || q.topic === LQ.topic) && toks.every(t => hay(q).includes(t)));
+  let html = '';
+  if (!toks.length) {
+    html = LAWS.topics.filter(t => !LQ.topic || t.id === LQ.topic).map(t => {
+      const list = qs.filter(q => q.topic === t.id);
+      return `<h2 class="law-h">${esc(t.title)}</h2><p class="law-intro">${esc(t.intro)}</p><div class="qa-grid">${list.map(q => qaCard(q, [])).join('')}</div>`;
+    }).join('');
+  } else {
+    const arts = [];
+    for (const l of LAWS.laws) {
+      if (LQ.topic && l.topic !== LQ.topic) continue;
+      for (const a of l.articles) {
+        const h = (l.short + ' article ' + a.no + ' ' + a.heading + ' ' + a.text).toLowerCase();
+        if (toks.every(t => h.includes(t))) arts.push({ l, a });
+      }
+    }
+    const snip = a => { const t = a.text.replace(/\s+/g, ' '), i = Math.max(0, t.toLowerCase().indexOf(toks[0]) - 80); return (i ? '… ' : '') + t.slice(i, i + 240) + (t.length > i + 240 ? ' …' : ''); };
+    html = `<p class="law-count">${qs.length} answer${qs.length === 1 ? '' : 's'} and ${arts.length} article${arts.length === 1 ? '' : 's'} match.</p>
+      ${qs.length ? `<div class="qa-grid">${qs.map(q => qaCard(q, toks)).join('')}</div>` : ''}
+      ${arts.length ? card('In the law text', 'Select an article to read it in full.', `<ul class="art-hits">${arts.slice(0, 40).map(({ l, a }) => `<li><a href="#laws/${l.id}-${a.no}"><strong>${esc(l.short)}${a.no ? ', Article ' + a.no : ''}</strong>${a.heading ? ' · ' + esc(a.heading) : ''}</a><span>${hl(snip(a), toks)}</span></li>`).join('')}</ul>${arts.length > 40 ? `<p class="meta">Showing the first 40. Add another word to narrow the search.</p>` : ''}`) : ''}
+      ${!qs.length && !arts.length ? '<p class="empty-note">Nothing matches. Try fewer or different words.</p>' : ''}`;
+  }
+  el.innerHTML = html;
+}
+
 function loadingNote(what) { return `<p class="empty-note">${what || 'Property figures'} are not available right now. Please try again later.</p>`; }
 
 const VIEWS = { dashboard: viewDashboard, sales: viewSales, rents: viewRents, areas: viewAreas, population: viewPopulation, transport: viewTransport,
-  schools: viewSchools, business: viewBusiness, tourism: viewTourism, methods: viewMethods, sources: viewSources, about: viewAbout };
+  schools: viewSchools, business: viewBusiness, tourism: viewTourism, methods: viewMethods, sources: viewSources, about: viewAbout,
+  rentcheck: viewRentcheck, laws: viewLaws };
 
 /* --------------------------------------------------------------- start */
 async function load() {
   const get = u => fetch(u, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
-  [RE, OFF] = await Promise.all([get('data/realestate.json'), get('data/official.json')]);
+  [RE, OFF, LAWS] = await Promise.all([get('data/realestate.json'), get('data/official.json'), get('data/laws.json')]);
   const st = $('#side-status');
   st.classList.toggle('ok', !!RE);
   st.classList.toggle('stale', !RE);

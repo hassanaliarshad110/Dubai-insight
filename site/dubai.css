@@ -52,3 +52,88 @@ table.data.cmp th[scope="row"] { position: static; background: none; font-weight
 .skel { height: 240px; border-radius: var(--r); background: linear-gradient(90deg, var(--muted) 0%, var(--muted-2) 50%, var(--muted) 100%); background-size: 200% 100%; animation: skel 1.4s ease infinite; }
 @keyframes skel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+/* ---------------------------------------------------------------- your rights: tools strip */
+.tool-strip { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
+@media (max-width: 760px) { .tool-strip { grid-template-columns: 1fr; } }
+.tool-card { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-decoration: none; color: var(--fg); border-left: 3px solid var(--gold); }
+.tool-card:hover { border-color: var(--accent); border-left-color: var(--gold); background: var(--accent-soft); }
+.tool-card strong { display: block; font-size: 15px; margin-bottom: 2px; }
+.tool-card span span { color: var(--muted-fg); font-size: 13px; line-height: 1.45; }
+.tool-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.tool-ic .ic { width: 20px; height: 20px; }
+.tool-card > .ic { color: var(--muted-fg); }
+
+/* ---------------------------------------------------------------- rent increase check */
+.rc-form { display: grid; gap: 14px; }
+.fld { display: grid; gap: 6px; font-size: 13px; }
+.fld > span { font-weight: 600; color: var(--fg-2); }
+.fld em { font-style: normal; font-weight: 400; color: var(--muted-fg); }
+.fld input, .fld select { padding: 9px 11px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--card); font-size: 15px; min-height: 40px; width: 100%; }
+.fld input:focus, .fld select:focus { outline: 2px solid var(--ring); outline-offset: 0; border-color: var(--accent); }
+.fld small { color: var(--muted-fg); font-size: 12px; line-height: 1.45; }
+.fld small a, .rc-out a, .rc-small a, #rc-notice a, #rc-area-card a, .qa a.cite, .art-hits a { color: var(--accent); }
+.fld-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.rc-big { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 12px; }
+.rc-big .kpi-value { font-size: 30px; }
+.rc-big .rc-date { font-size: 24px; }
+.rc-new { color: var(--fg-2); font-size: 14px; }
+.rc-working { font-size: 14px; line-height: 1.6; margin: 0 0 10px; }
+.rc-small { font-size: 13px; color: var(--muted-fg); line-height: 1.55; margin: 0; }
+.rc-warn { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; line-height: 1.5; background: var(--warn-soft); color: var(--fg); padding: 9px 11px; border-radius: var(--r-sm); margin: 0 0 10px; }
+.rc-warn .ic { color: var(--warn); flex: none; margin-top: 2px; }
+.rc-steps { margin: 4px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.7; color: var(--fg-2); }
+.rc-steps a { color: var(--accent); }
+
+/* ---------------------------------------------------------------- laws in plain words */
+.law-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 6px; }
+.law-search { flex: 1 1 420px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--r); background: var(--card); }
+.law-search .ic { color: var(--muted-fg); }
+.law-search input { flex: 1; border: 0; background: transparent; padding: 11px 0; font-size: 15px; outline: none; min-width: 0; }
+.law-search:focus-within { outline: 2px solid var(--ring); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--border-strong); background: var(--card); padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; min-height: 34px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.law-h { font-size: 18px; margin: 22px 2px 2px; }
+.law-intro, .law-count { color: var(--muted-fg); font-size: 13px; margin: 0 2px 10px; }
+.law-count { margin-top: 10px; }
+.qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
+@media (max-width: 1000px) { .qa-grid { grid-template-columns: 1fr; } }
+.qa h2 { font-size: 15.5px; line-height: 1.4; margin: 0 0 8px; }
+.qa p { font-size: 14px; line-height: 1.6; margin: 0 0 8px; color: var(--fg-2); }
+.qa .btn { display: inline-flex; text-decoration: none; }
+.qa-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; }
+.qa-based { color: var(--muted-fg); }
+.cite { text-decoration: none; background: var(--accent-soft); padding: 3px 8px; border-radius: 999px; font-weight: 500; }
+.qa-off { margin-left: auto; color: var(--muted-fg); text-decoration: none; display: inline-flex; gap: 4px; align-items: center; }
+.qa-off .ic { width: 13px; height: 13px; }
+.qa { display: flex; flex-direction: column; }
+mark { background: #FDE68A; color: inherit; border-radius: 2px; padding: 0 1px; }
+[data-theme="dark"] mark { background: rgba(200, 146, 43, .45); }
+.art-hits { list-style: none; margin: 0; padding: 0; }
+.art-hits li { padding: 9px 0; border-top: 1px solid var(--border); display: grid; gap: 3px; font-size: 13px; }
+.art-hits li:first-child { border-top: 0; }
+.art-hits a { text-decoration: none; }
+.art-hits span { color: var(--muted-fg); line-height: 1.5; }
+.law-lib { margin-top: 18px; }
+.law-topic { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted-fg); margin: 16px 0 6px; }
+details.law { border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; background: var(--card); }
+details.law > summary { cursor: pointer; padding: 11px 14px; display: grid; gap: 2px; list-style: none; }
+details.law > summary::-webkit-details-marker, details.art > summary::-webkit-details-marker { display: none; }
+details.law > summary span { font-size: 12.5px; color: var(--muted-fg); }
+details.law[open] > summary { border-bottom: 1px solid var(--border); }
+.law-arts { padding: 4px 14px 10px; }
+details.art { border-top: 1px solid var(--border); }
+details.art:first-child { border-top: 0; }
+details.art > summary { cursor: pointer; padding: 9px 0; font-size: 14px; font-weight: 500; list-style: none; }
+details.art > summary::before { content: '+'; display: inline-block; width: 18px; color: var(--accent); font-family: var(--mono); }
+details.art[open] > summary::before { content: '−'; }
+.art-body { padding: 0 0 10px 18px; }
+.art-body p { font-size: 13.5px; line-height: 1.6; margin: 0 0 6px; }
+.art-body .meta { font-size: 12px; color: var(--muted-fg); }
+.law-arts > .meta { font-size: 12px; color: var(--muted-fg); margin: 10px 0 0; }
+.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { 0% { box-shadow: 0 0 0 3px var(--gold); } 100% { box-shadow: 0 0 0 3px transparent; } }
+details.art, .qa, details.law { scroll-margin-top: 84px; }
+table.data.rc-bands td, table.data.rc-bands th { white-space: normal; height: auto; }
+@media (max-width: 600px) { table.data.rc-bands td.num { font-family: inherit; } table.data.rc-bands th:last-child, table.data.rc-bands td.num { width: 38%; } }

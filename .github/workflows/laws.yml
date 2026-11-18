@@ -22,6 +22,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python pipeline/laws.py
+      - run: python pipeline/lawlib.py
       - run: |
           git config user.name "Hassan Ali"
           git config user.email "hassanaliarshad110@users.noreply.github.com"

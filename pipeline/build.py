@@ -196,6 +196,8 @@ def main():
         o['built'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         json.dump(o, open(os.path.join(OUT, 'official.json'), 'w'), separators=(',', ':'), ensure_ascii=False)
         print('official.json', len(o.get('figures', [])), 'figures')
+    import lawlib
+    lawlib.main()
 
 
 if __name__ == '__main__':
