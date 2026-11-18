@@ -1,5 +1,5 @@
 # Dubai Insight connector (MCP server). Deployed by .github/workflows/connector.yml once the repository has the secret
-# CLOUDFLARE_API_TOKEN and the variable PUBLISH_CONNECTOR = true. Address: https://dubai-insight-mcp.<account>.workers.dev/mcp
+# CLOUDFLARE_API_TOKEN (switch off with the variable PUBLISH_CONNECTOR = false). Address: https://dubai-insight-mcp.<account>.workers.dev/mcp
 name = "dubai-insight-mcp"
 main = "worker.js"
 account_id = "fe741fb73102fe3e36536c88b45be6ec"

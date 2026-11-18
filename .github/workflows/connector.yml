@@ -1,9 +1,9 @@
 name: Connector
 
 # Builds the Dubai Insight connector (connector/, an MCP server for Claude, ChatGPT and other AI apps) with the latest
-# data, tests it, and deploys it to Cloudflare Workers. It only deploys once the repository has the secret
-# CLOUDFLARE_API_TOKEN (an "Edit Cloudflare Workers" token) and the variable PUBLISH_CONNECTOR set to "true";
-# until then it builds and tests only.
+# data, tests it, and deploys it to Cloudflare Workers as soon as the repository has the secret CLOUDFLARE_API_TOKEN
+# (an "Edit Cloudflare Workers" token; approved Nov 18, 2026). To switch deploys off, set the repository variable
+# PUBLISH_CONNECTOR to "false". Until the token is added it builds and tests only.
 on:
   workflow_run:
     workflows: ['Refresh data']
@@ -42,7 +42,7 @@ jobs:
       - name: Test
         run: node connector/test.mjs
       - name: Deploy
-        if: env.CLOUDFLARE_API_TOKEN != '' && env.PUBLISH == 'true'
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.PUBLISH != 'false'
         working-directory: connector
         run: |
           set -e
@@ -56,5 +56,5 @@ jobs:
           echo "### Connector address: $U/mcp" >> "$GITHUB_STEP_SUMMARY"
           node livecheck.mjs "$U/mcp" dubai_overview
       - name: Not deployed
-        if: env.CLOUDFLARE_API_TOKEN == '' || env.PUBLISH != 'true'
-        run: echo "Built and tested. Not deployed (needs the CLOUDFLARE_API_TOKEN secret and PUBLISH_CONNECTOR=true)."
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.PUBLISH == 'false'
+        run: echo "Built and tested. Not deployed (needs the CLOUDFLARE_API_TOKEN secret, or PUBLISH_CONNECTOR is false)."
