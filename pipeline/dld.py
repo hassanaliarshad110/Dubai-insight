@@ -212,14 +212,14 @@ def rent_month(ym):
 
 
 # ------------------------------------------------------------------ driver
-def run(kind, months, fn, deadline):
+def run(kind, months, fn, deadline, refresh=True):
     d = os.path.join(ROOT, kind)
     os.makedirs(d, exist_ok=True)
     today = date.today().strftime('%Y-%m')
     y, mo = map(int, today.split('-'))
     for _ in range(REFRESH_MONTHS - 1):
         y, mo = (y - 1, 12) if mo == 1 else (y, mo - 1)
-    recent = set(months_between(f'{y:04d}-{mo:02d}', today))
+    recent = set(months_between(f'{y:04d}-{mo:02d}', today)) if refresh else set()   # a backfill fills gaps only
     # newest first, so the site is useful after the first run; missing months before refreshing old ones
     todo = [m for m in reversed(months) if m in recent or not os.path.exists(os.path.join(d, m + '.json'))]
     empty_streak = 0
@@ -255,6 +255,7 @@ def main():
     ap.add_argument('--budget-min', type=float, default=120)
     ap.add_argument('--only', choices=['tx', 'rent'])
     ap.add_argument('--until', help='last month to pull (YYYY-MM); default this month')
+    ap.add_argument('--no-refresh', action='store_true', help='only months not saved yet (for a backfill: the daily run refreshes recent months)')
     a = ap.parse_args()
     start = time.time()
     unfinished = False
@@ -268,7 +269,7 @@ def main():
             since = max(since, open(stop).read().strip())
         # transactions get two-thirds of the time on the first pass, rents what is left
         dl = deadline if kind == 'rent' else start + a.budget_min * 60 * (0.6 if not a.only else 1)
-        if not run(kind, months_between(since, a.until or today), fn, dl):
+        if not run(kind, months_between(since, a.until or today), fn, dl, refresh=not a.no_refresh):
             unfinished = True
     log(f'done in {(time.time() - start) / 60:.1f} min')
     sys.exit(10 if unfinished else 0)      # 10: more months still to pull
