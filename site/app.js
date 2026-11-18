@@ -326,6 +326,9 @@ function viewRents() {
   head('rents', 'Rents', R && R.monthly.length ? `Every rental contract registered in Ejari, ${ml(R.first_month)} to ${mlong(R.monthly[R.monthly.length - 1].m)}` : '');
   if (!R || !R.last12) return body('rents', loadingNote('Rental contracts'));
   const L = R.last12, p = palette(), M = R.monthly.slice(-37);
+  const have = new Set(R.monthly.map(r => r.m)), gaps = [];
+  for (let d = new Date(R.first_month + '-01T00:00:00Z'); d.toISOString().slice(0, 7) < R.monthly[R.monthly.length - 1].m; d.setUTCMonth(d.getUTCMonth() + 1)) { const m = d.toISOString().slice(0, 7); if (!have.has(m)) gaps.push(mlong(m)); }
+  const gapNote = gaps.length ? `${gaps.join(', ')} ${gaps.length > 1 ? 'are' : 'is'} still being loaded and will appear shortly; totals leave ${gaps.length > 1 ? 'them' : 'it'} out until then.` : '';
   body('rents', `
     <div class="kpis">
       ${kpi(`Rental contracts, ${span(L.from, L.to)}`, fmt(L.contracts), `${fmt(L.new)} new contracts and ${fmt(L.contracts - L.new)} renewals`)}
@@ -334,8 +337,7 @@ function viewRents() {
       ${kpi('Typical annual rent, villas', 'AED ' + fmt(L.villa), 'Average of monthly medians, weighted by contracts')}
     </div>
     <div class="grid" style="margin-top:var(--gap)">
-      <div class="col-8">${card('Contracts every month', `New and renewed. ${partialNote()}`, canvas('r-month', 280))}</div>
-      <div class="col-4">${card('Flat rents by size', `Typical annual rent, ${span(L.from, L.to)}`, canvas('r-rooms', 280))}</div>
+      <div class="col-12">${card('Contracts every month', `New and renewed. ${partialNote()} ${gapNote}`, canvas('r-month', 280))}</div>
       <div class="col-12">${card('Median annual rent each month', 'Flats and villas, AED a year', canvas('r-med', 240))}</div>
       <div class="col-12">${card('Every area', `${span(L.from, L.to)}. Typical annual rent, AED. Select an area for its profile.`,
         `<div class="tbl-tools"><input type="search" id="r-q" placeholder="Find an area" aria-label="Find an area"></div><div class="table-wrap"><table class="data" id="r-areas"></table></div>`)}</div>
@@ -345,23 +347,19 @@ function viewRents() {
     { label: 'New', data: M.map(r => r.new), backgroundColor: M.map(r => r.partial ? p.b + '55' : p.b) },
     { label: 'Renewed', data: M.map(r => r.renewed), backgroundColor: M.map(r => r.partial ? p.a + '55' : p.a) }] },
     options: { scales: { x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0, maxTicksLimit: 10 } }, y: { stacked: true, ticks: { callback: v => fmt(v) } } } } });
-  chart('r-rooms', { type: 'bar', data: { labels: R.flat_rooms.map(r => r.rooms.replace(' bed rooms', ' bed').replace(' bed room', ' bed')), datasets: [{ label: 'Annual rent', data: R.flat_rooms.map(r => r.median), backgroundColor: p.a }] },
-    options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' AED ' + fmt(c.raw) + ' a year' } } }, scales: { x: { ticks: { callback: v => moneyAxis(v) } }, y: { grid: { display: false } } } } });
   chart('r-med', { type: 'line', data: { labels: M.map(r => ml(r.m)), datasets: [
     { label: 'Flats', data: M.map(r => r.flat), borderColor: p.a, backgroundColor: p.a, pointRadius: 0, borderWidth: 2, spanGaps: true },
     { label: 'Villas', data: M.map(r => r.villa), borderColor: p.b, backgroundColor: p.b, pointRadius: 0, borderWidth: 2, spanGaps: true }] },
     options: { scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, maxTicksLimit: 12 } }, y: { ticks: { callback: v => moneyAxis(v) } } }, plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: AED ${fmt(c.raw)}` } } } } });
-  const roomKeys = ['Studio', '1 bed room', '2 bed rooms', '3 bed rooms'];
-  const rows = R.areas.map(a => ({ ...a, studio: a.rooms['Studio'], r1: a.rooms['1 bed room'], r2: a.rooms['2 bed rooms'], r3: a.rooms['3 bed rooms'], newShare: a.contracts ? a.new / a.contracts * 100 : null }));
+  // the Land Department's rental records rarely give the number of rooms, so rents are shown by property type
+  const rows = R.areas.map(a => ({ ...a, newShare: a.contracts ? a.new / a.contracts * 100 : null }));
   const cols = [
     { k: 'name', t: 'Area', f: v => `<span class="area-link">${esc(v)}</span>` },
     { k: 'contracts', t: 'Contracts', num: true, f: v => fmt(v) },
     { k: 'newShare', t: 'New', num: true, f: v => v === null ? '–' : fmt(v, 0) + '%' },
-    { k: 'studio', t: 'Studio', num: true, f: v => v ? fmt(v) : '–' },
-    { k: 'r1', t: '1 bed', num: true, f: v => v ? fmt(v) : '–' },
-    { k: 'r2', t: '2 bed', num: true, f: v => v ? fmt(v) : '–' },
-    { k: 'r3', t: '3 bed', num: true, f: v => v ? fmt(v) : '–' },
-    { k: 'villa', t: 'Villa', num: true, f: (v, r) => r.n_villa >= 10 ? fmt(v) : '–' }];
+    { k: 'flat', t: 'Flats', num: true, f: (v, r) => r.n_flat >= 20 ? fmt(v) : '–' },
+    { k: 'villa', t: 'Villas', num: true, f: (v, r) => r.n_villa >= 20 ? fmt(v) : '–' },
+    { k: 'office', t: 'Offices', num: true, f: v => v ? fmt(v) : '–' }];
   const draw = q => sortable('r-areas', rows.filter(a => !q || a.name.toLowerCase().includes(q)), cols, n => go('areas', n), 'contracts');
   draw('');
   $('#r-q').addEventListener('input', e => draw(e.target.value.trim().toLowerCase()));
@@ -437,8 +435,8 @@ function areaProfile(n) {
       ${R ? kpi('Rental contracts, ' + (R.span || AS()), fmt(R.contracts), R.flat ? `Typical flat rent AED ${fmt(R.flat)} a year` : '') : ''}
     </div>
     <div class="grid" style="margin-top:var(--gap)">
-      ${A ? `<div class="col-8">${card('Sales and price every month', `Number of sales (bars) and the median flat price per m² (line). ${partialNote()}`, canvas('ap-sales', 280))}</div>` : ''}
-      ${R && Object.keys(R.rooms).length ? `<div class="col-4">${card('Flat rents by size', 'Typical annual rent, AED', canvas('ap-rooms', 280))}</div>` : ''}
+      ${A ? `<div class="col-12">${card('Sales and price every month', `Number of sales (bars) and the median flat price per m² (line). ${partialNote()}`, canvas('ap-sales', 280))}</div>` : ''}
+      
       ${A ? `<div class="col-12">${card('Where this area stands', 'Its rank among all areas of Dubai, ' + AS(), `<div class="stats rank-stats" id="ap-rank"></div>`)}</div>` : ''}
     </div>
     <p class="foot-src">Source: ${DLD_SRC()}. <a href="#methods">How it's counted</a></p>`);
@@ -451,11 +449,6 @@ function areaProfile(n) {
     const rank = (k, desc = true) => { const xs = RE.areas.filter(r => r[k] !== null && (k !== 'ppsqm_flat' || r.n_flat >= 10)).sort((a, b) => desc ? b[k] - a[k] : a[k] - b[k]); const i = xs.findIndex(r => r.name === n); return i < 0 ? '–' : `${i + 1} of ${xs.length}`; };
     $('#ap-rank').innerHTML = [['Most sales', rank('sales')], ['Highest value of sales', rank('value')], ['Highest flat price per m²', A.n_flat >= 10 ? rank('ppsqm_flat') : '–'], ['Most sold off-plan', A.sales >= 20 ? rank('offplan_share') : '–']]
       .map(([t, v]) => `<div class="stat"><dt>${t}</dt><dd>${v}</dd></div>`).join('');
-  }
-  if (R && Object.keys(R.rooms).length) {
-    const ks = ['Studio', '1 bed room', '2 bed rooms', '3 bed rooms', '4 bed rooms'].filter(k => R.rooms[k]);
-    chart('ap-rooms', { type: 'bar', data: { labels: ks.map(k => k.replace(' bed rooms', ' bed').replace(' bed room', ' bed')), datasets: [{ label: 'Annual rent', data: ks.map(k => R.rooms[k]), backgroundColor: p.a }] },
-      options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' AED ' + fmt(c.raw) } } }, scales: { x: { ticks: { callback: v => moneyAxis(v) } }, y: { grid: { display: false } } } } });
   }
 }
 
