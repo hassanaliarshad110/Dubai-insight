@@ -1,6 +1,6 @@
 // A small, dependency-free MCP server for Cloudflare Workers: the Streamable HTTP transport, stateless and read-only.
 // One POST /mcp carries a JSON-RPC message (or a batch); the answer comes back as JSON. No sessions, no sign-in.
-// The same file serves Dubai Insight and Calgary Insight; each passes its own name, instructions and tools.
+// Each connector passes its own name, instructions and tools.
 
 const VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 const CORS = {
